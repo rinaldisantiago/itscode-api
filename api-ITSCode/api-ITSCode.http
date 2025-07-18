@@ -1,0 +1,6 @@
+@api_ITSCode_HostAddress = http://localhost:5052
+
+GET {{api_ITSCode_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
