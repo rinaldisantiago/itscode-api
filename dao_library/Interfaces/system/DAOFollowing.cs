@@ -8,7 +8,6 @@ public interface DAOFollowing
     IEnumerable<Following> GetAllFollowings();
     void UpdateFollowing(Following following);
     void DeleteFollowing(int id);
-    public void Save(Following following);
 }
     
 

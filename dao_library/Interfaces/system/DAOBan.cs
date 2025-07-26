@@ -8,7 +8,7 @@ public interface DAOBan
     IEnumerable<Ban> GetAllBans();
     void UpdateBan(Ban ban);
     void DeleteBan(int id);
-    void Save(Ban ban);
+
     
 }
     

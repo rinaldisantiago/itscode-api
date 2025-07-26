@@ -1,10 +1,10 @@
 public class Person
 {
-    private int idPerson;
+    private int id;
     private string fullName = "";
 
 
-    public int IdPerson { get { return this.idPerson; } set { this.idPerson = value; } }
+    public int Id { get { return this.id; } set { this.id = value; } }
     public string FullName { get { return this.fullName; } set { this.fullName = value; } }
 
 }

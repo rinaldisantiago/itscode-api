@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
 
+
 namespace apiUser.Controllers
 {
     [ApiController]
@@ -18,28 +19,89 @@ namespace apiUser.Controllers
         }
 
 
-
-        [HttpGet("{idUser}")]
-        public IActionResult Get(int idUser)
+        [HttpPost]
+        public IActionResult CreateUser([FromBody] PostUserRequestDTO dto)
         {
-            User? usuario = this.df.CreateDAOUser().GetUser(idUser);
-            if (usuario == null)
+            User user = new User
             {
-                return NotFound();
-            }
-            return Ok(usuario);
-        }
-        [HttpGet("all")]
-        public IActionResult GetAll()
-        {
-            List<User> usuarios = this.df.CreateDAOUser().GetAll();
-            if (usuarios == null )
+                FullName = dto.FullName,
+                UserName = dto.Username,
+                Email = dto.Email,
+                Password = dto.Password,
+                Role = dto.RoleId.HasValue ? this.df.CreateDAORole().GetRoleById(dto.RoleId.Value) : null,
+                Avatar = this.df.CreateDAOImage().CreateImage(dto.URLAvatar)
+            };
+
+            this.df.CreateDAOUser().CreateUser(user);
+
+
+            return Ok(new
             {
-                return NotFound();
-            }
-            return Ok(usuarios);
+                message = "User created successfully",
+                userName = user.FullName
+            });
         }
 
-        
+
+        [HttpGet("")]
+        public GetUserResponseDTO getUser([FromQuery] GetUserRequestDTO request)
+        {
+            User user = this.df.CreateDAOUser().GetUser(request.Id);
+            if (user == null) return null;
+
+            GetUserResponseDTO response = new GetUserResponseDTO
+            {
+                fullName = user.FullName,
+                userName = user.UserName,
+                email = user.Email,
+                urlAvatar = user.GetAvatar
+            };
+
+            return response;
+        }
+
+        [HttpPut("")]
+        public IActionResult UpdateUser(int id, [FromBody] PutUserRequestDTO request)
+        {
+            User user = this.df.CreateDAOUser().GetUser(id);
+            if (user == null) return NotFound();
+            user.FullName = request.fullName;
+            user.UserName = request.userName;
+            user.Email = request.email;
+            user.Password = request.password;
+            user.Avatar.Url = request.urlAvatar;
+
+
+            User updateUser = this.df.CreateDAOUser().UpdateUser(user);
+            
+            PutUserResponseDTO response = new PutUserResponseDTO
+            {
+                fullName = updateUser.FullName,
+                userName = updateUser.UserName,
+                email = updateUser.Email,
+                urlAvatar = updateUser.GetAvatar
+            };
+
+            return Ok(response);
+        }
+
+        [HttpDelete("")]
+        public IActionResult DeleteUser([FromQuery] DeleteUserRequestDTO request)
+        {
+            User user = this.df.CreateDAOUser().GetUser(request.id);
+            if (user == null) return NotFound();
+
+            this.df.CreateDAOUser().DeleteUser(request.id);
+
+            DeleteUserResponseDTO response = new DeleteUserResponseDTO
+            {
+                Message = "User deleted successfully",
+            };
+           
+
+            return Ok(response);
+
+            
+        }
     }
 }

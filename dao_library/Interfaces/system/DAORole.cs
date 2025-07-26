@@ -6,7 +6,7 @@
     IEnumerable<Role> GetAllRoles();
     void UpdateRole(Role role);
     void DeleteRole(int id);
-    void Save(Role role);
+
     
 }
     

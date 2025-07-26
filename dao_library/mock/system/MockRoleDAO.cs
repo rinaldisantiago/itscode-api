@@ -11,8 +11,8 @@ namespace dao_library
         public MockRoleDAO()
         {
             // Roles de prueba
-            _Roles.Add(new Role { IdRole = 1, RoleName = "Admin" });
-            _Roles.Add(new Role { IdRole = 2, RoleName = "User" });
+            _Roles.Add(new Role { Id = 1, Name = "Admin" });
+            _Roles.Add(new Role { Id = 2, Name = "User" });
         }
 
         public List<Role> GetAll()
@@ -22,21 +22,15 @@ namespace dao_library
 
         public Role GetRoleById(int id)
         {
-            return _Roles.FirstOrDefault(r => r.IdRole == id);
-        }
-
-        public void Save(Role role)
-        {
-            role.IdRole = _Roles.Max(r => r.IdRole) + 1;
-            _Roles.Add(role);
+            return _Roles.FirstOrDefault(r => r.Id == id);
         }
 
         public void UpdateRole(Role role)
         {
-            var existingRole = GetRoleById(role.IdRole);
+            var existingRole = GetRoleById(role.Id);
             if (existingRole != null)
             {
-                existingRole.RoleName = role.RoleName;
+                existingRole.Name = role.Name;
             }
         }
 
@@ -56,7 +50,8 @@ namespace dao_library
 
         public void CreateRole(Role role)
         {
-            Save(role);
+            role.Id = _Roles.Max(r => r.Id) + 1;
+            _Roles.Add(role);
         }
         
     }

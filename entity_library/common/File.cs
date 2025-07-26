@@ -1,11 +1,14 @@
 public class File
 {
-    private int idFile;
-    private string fileName = "";
-    private string filePath = "";
+    private int id;
+    private string name = "";
+    private string path = "";
+    private string url = "";
 
-    public int IdFile { get { return this.idFile; } set { this.idFile = value; } }
-    public string FileName { get { return this.fileName; } set { this.fileName = value; } }
-    public string FilePath { get { return this.filePath; } set { this.filePath = value; } }
+    public int Id { get { return this.id; } set { this.id = value; } }
+    public string Name { get { return this.name; } set { this.name = value; } }
+
+    public string Path { get { return this.path; } set { this.path = value; } }
+    public string Url { get { return this.url; } set { this.url = value; } }
 
 }

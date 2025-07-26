@@ -19,27 +19,26 @@ namespace apiPost.Controllers
 
 
 
-        [HttpGet("{idPost}")]
-        public IActionResult Get(int idPost)
+        [HttpGet("")]
+        public GetPostResponseDTO getPost([FromQuery] GetPostRequestDTO request)
         {
-            Post? post = this.df.CreateDAOPost().GetPostById(idPost);
-            if (post == null)
-            {
-                return NotFound();
-            }
-            return Ok(post);
-        }
-        [HttpGet("all")]
-        public IActionResult GetAllPost()
-        {
-            IEnumerable<Post> posts = this.df.CreateDAOPost().GetAllPosts();
-            if (posts == null )
-            {
-                return NotFound();
-            }
-            return Ok(posts);
-        }
+            Post post = this.df.CreateDAOPost().GetPostById(request.Id);
+            if (post == null) return null;
 
-        
+            GetPostResponseDTO response = new GetPostResponseDTO
+            {
+                title = post.Title,
+                content = post.Content,
+                userName = post.UserName,
+                userAvatar = post.userAvatar,
+                commentsCount = post.GetCountComments(),
+                likes = post.GetCountLike(),
+                dislikes = post.GetCountDislike(),
+                fileUrl = post.File?.Url ?? "",
+            };
+
+            return response;
+            
+        }
     }
 }

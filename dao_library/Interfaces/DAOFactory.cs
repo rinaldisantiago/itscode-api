@@ -3,8 +3,9 @@ public interface DAOFactory
     DAOUser CreateDAOUser();
     DAOPost CreateDAOPost();
     DAORole CreateDAORole();
-    DAOBan CreateDAOBan();
+    // DAOBan CreateDAOBan();
     DAOFollowing CreateDAOFollowing();
-    DAOCommet CreateDAOComment();
+    DAOImage CreateDAOImage();
+    DAOfile CreateDAOFile();
     
 }

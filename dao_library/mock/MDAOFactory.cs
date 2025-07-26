@@ -17,20 +17,27 @@ public class MDAOFactory : DAOFactory
         return new MockRoleDAO();
     }
 
-    public DAOBan CreateDAOBan()
-    {
-        return new MockBanDAO();
-    }
+    // public DAOBan CreateDAOBan()
+    // {
+    //     return new MockBanDAO();
+    // }
 
     public DAOFollowing CreateDAOFollowing()
     {
         return new MockFollowingDAO();
     }
 
-    public DAOCommet CreateDAOComment()
+    public DAOImage CreateDAOImage()
     {
-        return new MockCommentDAO();
+        return new MockImageDAO();
     }
+
+    public DAOfile CreateDAOFile()
+    {
+        return new MockFileDAO();
+    }
+
+
 
     
 }

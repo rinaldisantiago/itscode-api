@@ -10,30 +10,27 @@ namespace dao_library
 
         public MockFollowingDAO()
         {
+            MockUserDAO userDAO = new MockUserDAO();
+            User user1 = userDAO.GetUser(1);
+            User user2 = userDAO.GetUser(2);
             // Seguimientos de prueba
-            _Followings.Add(new Following { IdFollowing = 1, FollowerId = 1, FollowedId = 2 });
-            _Followings.Add(new Following { IdFollowing = 2, FollowerId = 2, FollowedId = 1 });
+            _Followings.Add(new Following { Id = 1, UserFollowed = user1, UserFollowing = user2 });
+            _Followings.Add(new Following { Id = 2, UserFollowed = user2, UserFollowing = user1 });
         }
 
 
         public Following GetFollowingById(int id)
         {
-            return _Followings.FirstOrDefault(f => f.IdFollowing == id);
-        }
-
-        public void Save(Following following)
-        {
-            following.IdFollowing = _Followings.Max(f => f.IdFollowing) + 1;
-            _Followings.Add(following);
+            return _Followings.FirstOrDefault(f => f.Id == id);
         }
 
         public void UpdateFollowing(Following following)
         {
-            var existingFollowing = GetFollowingById(following.IdFollowing);
+            var existingFollowing = GetFollowingById(following.Id);
             if (existingFollowing != null)
             {
-                existingFollowing.FollowerId = following.FollowerId;
-                existingFollowing.FollowedId = following.FollowedId;
+                existingFollowing.UserFollowed = following.UserFollowed;
+                existingFollowing.UserFollowing = following.UserFollowing;
             }
         }
 
@@ -53,7 +50,8 @@ namespace dao_library
 
         public void CreateFollowing(Following following)
         {
-            Save(following);
+            following.Id = _Followings.Max(f => f.Id) + 1;
+            _Followings.Add(following);
         }
     }
 }

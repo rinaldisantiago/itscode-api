@@ -2,20 +2,45 @@
 
 public class User : Person
 {
-    private string username = "";
+    private string userName = "";
     private string email = "";
     private string password = "";
     private Role? role;
-    // private List<Post>? posts;
+    private Image? avatar;
 
 
 
-    public string Username
-    { get { return this.username; } set { this.username = value; } }
+    public string UserName { get { return this.userName; } set { this.userName = value; } }
     public string Email { get { return this.email; } set { this.email = value; } }
     public string Password { get { return this.password; } set { this.password = value; } }
     public Role? Role { get { return this.role; } set { this.role = value; } }
+    public Image? Avatar { get { return this.avatar; } set { this.avatar = value; } }
 
-    // public List<Post>? Posts { get { return this.posts; } set { this.posts = value; } }
+
+    public string GetRole
+    {
+        get
+        {
+
+            if (this.Role != null)
+            {
+                return this.Role.Name;
+            }
+            return "No role assigned";
+        }
+    }
+
+    public string GetAvatar
+    {
+        get
+        {
+            if (this.Avatar != null)
+            {
+                return this.Avatar.Url;
+            }
+            return "No avatar assigned";
+        }
+    }
+    
 
 }

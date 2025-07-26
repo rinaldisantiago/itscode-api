@@ -10,47 +10,53 @@ namespace dao_library
 
         public MockUserDAO()
         {
-            // Usuarios de prueba
-            _users.Add(new User { IdPerson = 1, FullName = "Herhandez Carlos", Username = "Carlos", Email = "carlos@example.com", Password = "password123", Role = new Role { IdRole = 1 } });
-            _users.Add(new User { IdPerson = 2, FullName = "Hernandez Joaquin", Username = "Joaco", Email = "joaco@example.com", Password = "password456", Role = new Role { IdRole = 2 } });
+            MockRoleDAO roleDAO = new MockRoleDAO();
+            MockImageDAO imageDAO = new MockImageDAO();
+
+
+            _users.Add(new User { Id = 1, FullName = "Herhandez Carlos", UserName = "Carlos", Email = "carlos@example.com", Password = "password123", Role = roleDAO.GetRoleById(1), Avatar = imageDAO.GetImage("http://example.com/image1.jpg") });
+            _users.Add(new User { Id = 2, FullName = "Hernandez Joaquin", UserName = "Joaco", Email = "joaco@example.com", Password = "password456", Role = roleDAO.GetRoleById(2), Avatar = imageDAO.GetImage("http://example.com/image2.jpg") });
         }
 
-        public List<User> GetAll()
-        {
-            return _users;
-        }
+        // public List<User> GetAll()
+        // {
+        //     return _users;
+        // }
 
         public User GetUser(int idUser)
         {
-            return _users.FirstOrDefault(u => u.IdPerson == idUser);
+            return _users.FirstOrDefault(u => u.Id == idUser);
+        }
+        
+        public User GetUserByEmail(string email)
+        {
+            return _users.FirstOrDefault(u => u.Email == email);
         }
 
-        public void Save(User user)
-        {
-            user.IdPerson = _users.Max(u => u.IdPerson) + 1;
-            _users.Add(user);
-        }
 
         public void CreateUser(User user)
         {
-            Save(user);
+            user.Id = _users.Max(u => u.Id) + 1;
+            _users.Add(user);
         }
 
-        public void UpdateUser(User user)
+        public User UpdateUser(User user)
         {
-            var existingUser = GetUser(user.IdPerson);
+            User existingUser = GetUser(user.Id);
             if (existingUser != null)
             {
                 existingUser.FullName = user.FullName;
-                existingUser.Username = user.Username;
+                existingUser.UserName = user.UserName;
                 existingUser.Email = user.Email;
                 existingUser.Password = user.Password;
+                existingUser.Avatar.Url = user.Avatar.Url;
             }
+            return existingUser;
         }
         
         public void DeleteUser(int idUser)
         {
-            var user = GetUser(idUser);
+            User user = GetUser(idUser);
             if (user != null)
             {
                 _users.Remove(user);

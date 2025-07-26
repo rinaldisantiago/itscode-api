@@ -8,7 +8,6 @@ public interface DAOPost
     IEnumerable<Post> GetAllPosts();
     void UpdatePost(Post post);
     void DeletePost(int id);
-    void Save(Post post);
     
 }
     

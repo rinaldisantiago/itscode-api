@@ -4,20 +4,160 @@ namespace entity_library;
 
 public class Post
 {
-    private int idPost;
-    private int idPerson;
-    private string title;
-    private string content;
-    private List<Interaction>? interactions;
-    private File? file;
-    private List<Comment>? comments;
+    // private int id;
+    // private User? user;
+    // private string title;
+    // private string content;
+    // private List<Interaction>? interactions;
+    // private File? file;
+    // private List<Comment>? comments;
 
 
-    public int IdPost { get { return this.idPost; } set { this.idPost = value; } }
-    public string Title { get { return this.title; } set { this.title = value; } }
-    public string Content { get { return this.content; } set { this.content = value; } }
-    public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
-    public File? File { get { return this.file; } set { this.file = value; } }
-    public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
-    public int IdPerson { get { return this.idPerson;} set { this.idPerson = value; }}
+    // public int Id { get { return this.id; } set { this.id = value; } }
+    // public User? User { get { return this.user; } set { this.user = value; } }
+    // public string Title { get { return this.title; } set { this.title = value; } }
+    // public string Content { get { return this.content; } set { this.content = value; } }
+    // public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
+    // public File? File { get { return this.file; } set { this.file = value; } }
+    // public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
+
+
+        private int id;
+        public int Id { get { return this.id; } set { this.id = value; } }
+        private string title = "";
+        public string Title { get { return this.title; } set { this.title = value; } }
+        private string content = "";
+        public string Content { get { return this.content; } set { this.content = value; } }
+        private User? user;
+        public User? User { get { return this.user; } set { this.user = value; } }
+
+        public long IdUser
+        {
+            get
+            {
+                if (this.User != null)
+                {
+                    return this.User.Id;
+                }
+                return 0;
+            }
+        }
+
+        public string UserFullName
+        {
+            get
+            {
+                if (this.User != null)
+                {
+                    return this.User.FullName;
+                }
+                return "Sin usuario";
+            }
+        }
+
+        public string UserName
+        {
+            get
+            {
+                if (this.User != null)
+                {
+                    return this.User.UserName;
+                }
+                return "Sin usuario";
+            }
+        }
+
+
+        public string userAvatar
+        {
+            get
+            {
+                if (this.User != null && this.User.Avatar != null)
+                {
+                    return this.User.Avatar.Url;
+                }
+                return "No se encuentra ninguna imagen";
+            }
+        }
+
+
+        private List<Interaction>? interactions;
+        public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
+
+        public object GetInteractions()
+        {
+            if (this.Interactions == null)
+            {
+                return new List<object>();
+            }
+            return this.Interactions.Select(interaction => new
+            {
+                Id = interaction.Id,
+                UserName = interaction.User,
+                InteractionType = interaction.Type?.Name ?? "Sin tipo de interacción",
+                
+            })
+            .Cast<object>()
+            .ToList();
+        }
+        public int GetCountLike()
+        {
+            if (this.Interactions == null) return 0;
+            return this.Interactions.Where(interaction => interaction.Type?.Id == 1).Count();
+        }
+
+        public int GetCountDislike()
+        {
+            if (this.Interactions == null) return 0;
+            return this.Interactions.Where(interaction => interaction.Type?.Id == 2).Count();
+        }
+
+
+        private List<Comment>? comments;
+        public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
+
+        public object GetComments()
+        {
+            if (this.Comments == null)
+            {
+                return new List<Comment>();
+            }
+            return this.Comments.Select(comment => new
+            {
+                Id = comment.Id,
+                UserName = comment.User,
+                Content = comment.Content,
+                
+            })
+            .Cast<Comment>()
+            .ToList();
+        }
+        public int GetCountComments()
+        {
+            if (this.Comments == null) return 0;
+            return this.Comments.Where(comment => comment.Content != null && comment.Content.Trim() != "").Count();
+        }
+
+
+        private File? file;
+        public File? File { get { return this.file; } set { this.file = value; } }
+        public long IdFile
+        {
+            get
+            {
+                if (this.File != null)
+                {
+                    return this.File.Id;
+                }
+                return 0;
+            }
+        }
+        public string GetUrlImage()
+        {
+            if (this.File != null && this.File.Url != null)
+            {
+                return this.File.Url;
+            }
+            return "No se encuentra ninguna imagen";
+        }
 }

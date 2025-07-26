@@ -1,14 +1,16 @@
+using entity_library;
+
 public class Interaction
 {
-    private int idInteraction;
-    private int idPost;
-    private int idPerson;
-    private InteractionType type;
-    private DateTime timestamp;
+    private int id;
+    private Post? post;
+    private User? user;
+    private InteractionType? interactionType;
 
-    public int IdInteraction { get { return this.idInteraction; } set { this.idInteraction = value; } }
-    public InteractionType Type { get { return this.type; } set { this.type = value; } }
-    public DateTime Timestamp { get { return this.timestamp; } set { this.timestamp = value; } }
-    public int IdPost { get { return this.idPost; } set { this.idPost = value; } }
-    public int IdPerson { get { return this.idPerson; } set { this.idPerson = value; } }
+
+    public int Id { get { return this.id; } set { this.id = value; } }
+    public InteractionType? Type { get { return this.interactionType; } set { this.interactionType = value; } }
+
+    public Post? Post { get { return this.post; } set { this.post = value; } }
+    public User? User { get { return this.user; } set { this.user = value; } }
 }
