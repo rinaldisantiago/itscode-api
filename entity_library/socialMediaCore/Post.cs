@@ -84,52 +84,53 @@ public class Post
         private List<Interaction>? interactions;
         public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
 
-        public object GetInteractions()
-        {
-            if (this.Interactions == null)
-            {
-                return new List<object>();
-            }
-            return this.Interactions.Select(interaction => new
-            {
-                Id = interaction.Id,
-                UserName = interaction.User,
-                InteractionType = interaction.Type?.Name ?? "Sin tipo de interacción",
+        // public object GetInteractions()
+        // {
+        //     if (this.Interactions == null)
+        //     {
+        //         return new List<object>();
+        //     }
+        //     return this.Interactions.Select(interaction => new
+        //     {
+        //         Id = interaction.Id,
+        //         UserName = interaction.User,
+        //         InteractionType = interaction.InteractionType.1 ?? "Sin tipo de interacción",
                 
-            })
-            .Cast<object>()
-            .ToList();
-        }
+        //     })
+        //     .Cast<object>()
+        //     .ToList();
+        // }
         public int GetCountLike()
         {
             if (this.Interactions == null) return 0;
-            return this.Interactions.Where(interaction => interaction.Type?.Id == 1).Count();
+            return this.Interactions?.Count(interaction => interaction.InteractionType == InteractionType.Like) ?? 0;
         }
 
         public int GetCountDislike()
         {
             if (this.Interactions == null) return 0;
-            return this.Interactions.Where(interaction => interaction.Type?.Id == 2).Count();
+            return this.Interactions?.Count(interaction => interaction.InteractionType == InteractionType.Dislike) ?? 0;
         }
 
 
         private List<Comment>? comments;
         public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
 
-        public object GetComments()
+        public List<object> GetComments()
         {
             if (this.Comments == null)
             {
-                return new List<Comment>();
+                return new List<object>();
             }
             return this.Comments.Select(comment => new
             {
                 Id = comment.Id,
-                UserName = comment.User,
+                UserName = comment.User.FullName,
+                userAvatar = comment.User.Avatar.Url ?? "",
                 Content = comment.Content,
-                
+
             })
-            .Cast<Comment>()
+            .Cast<object>()
             .ToList();
         }
         public int GetCountComments()

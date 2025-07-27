@@ -1,4 +1,5 @@
 public class DeletePostResponseDTO
 {
-    public string Message { get; set; } = "Post eliminado.";
+    public string message { get; set; } = "Post eliminado.";
+    public int idPost { get; set; }
 }

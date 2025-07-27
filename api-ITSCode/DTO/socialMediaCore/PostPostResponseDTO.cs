@@ -1,6 +1,5 @@
 public class PostPostResponseDTO
 {
-    public string FullName { get; set; }
-    public string Username { get; set; }
-
+    public string message { get; set; } = "";
+    public int IdUser { get; set; }
 }

@@ -35,10 +35,49 @@ namespace apiPost.Controllers
                 likes = post.GetCountLike(),
                 dislikes = post.GetCountDislike(),
                 fileUrl = post.File?.Url ?? "",
+                comments = post.GetComments()
             };
 
             return response;
-            
+
+        }
+
+        [HttpPost("")]
+        public PostPostResponseDTO PostPost([FromQuery] PostPostRequestDTO request)
+        {
+            Post newPost = new Post
+            {
+                Title = request.title,
+                Content = request.content,
+                User = this.df.CreateDAOUser().GetUser(1),
+                File = this.df.CreateDAOFile().GetFile(request.fileUrl)
+            };
+
+            this.df.CreateDAOPost().CreatePost(newPost);
+
+            PostPostResponseDTO response = new PostPostResponseDTO
+            {
+                message = "Post created successfully",
+                IdUser = newPost.User.Id
+            };
+
+            return response;
+
+        }
+
+
+        [HttpDelete("")]
+        public DeletePostResponseDTO DeletePost([FromQuery] DeletePostRequestDTO request)
+        {
+            Post post = this.df.CreateDAOPost().GetPostById(request.id);
+            if (post == null) return new DeletePostResponseDTO { message = "Post not found" };
+
+            this.df.CreateDAOPost().DeletePost(request.id);
+
+            return new DeletePostResponseDTO
+            {
+                idPost = request.id
+            };
         }
     }
 }
