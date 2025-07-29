@@ -6,7 +6,7 @@ using entity_library;
 namespace apiUser.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("User")]
     public class UserController : ControllerBase
     {
         private readonly ILogger<UserController> _logger;
@@ -19,18 +19,29 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("create")]
         public IActionResult CreateUser([FromBody] PostUserRequestDTO dto)
         {
+            Image avatar = new Image
+            {
+                Url = dto.URLAvatar
+            };
+            Role role = new Role
+            {
+                Id = dto.RoleId ?? 0
+            };
+
             User user = new User
             {
                 FullName = dto.FullName,
                 UserName = dto.Username,
                 Email = dto.Email,
                 Password = dto.Password,
-                Role = dto.RoleId.HasValue ? this.df.CreateDAORole().GetRoleById(dto.RoleId.Value) : null,
-                Avatar = this.df.CreateDAOImage().CreateImage(dto.URLAvatar)
+                Role = role,
+                Avatar = avatar
             };
+
+            user.SetPassword(user.Password);
 
             this.df.CreateDAOUser().CreateUser(user);
 
@@ -43,7 +54,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpGet("")]
+        [HttpGet("get")]
         public GetUserResponseDTO getUser([FromQuery] GetUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.Id);
@@ -60,7 +71,7 @@ namespace apiUser.Controllers
             return response;
         }
 
-        [HttpPut("")]
+        [HttpPut("update")]
         public IActionResult UpdateUser(int id, [FromBody] PutUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(id);
@@ -68,12 +79,12 @@ namespace apiUser.Controllers
             user.FullName = request.fullName;
             user.UserName = request.userName;
             user.Email = request.email;
-            user.Password = request.password;
+            user.encript(request.password);
             user.Avatar.Url = request.urlAvatar;
 
 
             User updateUser = this.df.CreateDAOUser().UpdateUser(user);
-            
+
             PutUserResponseDTO response = new PutUserResponseDTO
             {
                 fullName = updateUser.FullName,
@@ -85,7 +96,7 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("")]
+        [HttpDelete("delete")]
         public IActionResult DeleteUser([FromQuery] DeleteUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.id);
@@ -97,11 +108,53 @@ namespace apiUser.Controllers
             {
                 Message = "User deleted successfully",
             };
-           
+
 
             return Ok(response);
 
-            
+
+        }
+
+
+        [HttpGet("Login")]
+        public IActionResult Login([FromQuery] LoginRequestDTO request)
+        {
+            if (String.IsNullOrEmpty(request.userName) || String.IsNullOrEmpty(request.password))
+            {
+               
+                return BadRequest(
+                    new { message = "Username and password are required." }
+                ) ;
+            }
+
+            string encryptedPassword = new User().encript(request.password);
+
+            User user = this.df.CreateDAOUser().GetUserByUsernameAndPassword(request.userName, encryptedPassword);
+
+
+
+            if (user == null)
+            {
+                return BadRequest(
+                   new { message = "Username or password are invalid." }
+               );
+            }
+
+            LoginResponseDTO response = new LoginResponseDTO
+            {
+                Id = user.Id,
+                FullName = user.FullName,
+                UserName = user.UserName,
+                Email = user.Email,
+                UrlAvatar = user.GetAvatar
+            };
+
+            return Ok(new
+            {
+                message = "Login successful",
+                user = response
+            }
+            );
         }
     }
 }

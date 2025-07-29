@@ -41,6 +41,20 @@ public class User : Person
             return "No avatar assigned";
         }
     }
+
+    public string encript(string password)
+    {
+        return password + "123456";
+    }
+    public void SetPassword(string password)
+    {
+        this.password = this.encript(password);
+    }
+    public bool IsPasswordValid(string password)
+    {
+        string hashPassword = this.encript(password);
+        return hashPassword == this.Password;
+    }
     
 
 }

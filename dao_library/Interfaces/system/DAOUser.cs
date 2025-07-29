@@ -8,5 +8,6 @@ public interface DAOUser
     User UpdateUser(User user);
     void DeleteUser(int idUser);
     User? GetUserByEmail(string email);
+    User GetUserByUsernameAndPassword(string userName, string password);
 }
 

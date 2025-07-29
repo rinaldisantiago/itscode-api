@@ -1,0 +1,59 @@
+using Microsoft.AspNetCore.Mvc;
+using dao_library;
+using entity_library;
+
+namespace apiPost.Controllers
+{
+    [ApiController]
+    [Route("[controller]")]
+    public class FollowingController : ControllerBase
+    {
+        private readonly ILogger<FollowingController> _logger;
+        private DAOFactory df;
+
+        public FollowingController(ILogger<FollowingController> logger, DAOFactory df)
+        {
+            _logger = logger;
+            this.df = df;
+        }
+
+        [HttpPost("follow")]
+        public IActionResult FollowUser([FromQuery] FollowRequestDTO request)
+        {
+            User userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
+            User userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
+
+            if (userFollowing == null || userFollowed == null)
+            {
+                return NotFound("User not found");
+            }
+
+            Following following = new Following
+            {
+                UserFollowing = userFollowing,
+                UserFollowed = userFollowed
+            };
+
+            this.df.CreateDAOFollowing().CreateFollowing(following);
+
+            FollowResponseDTO response = new FollowResponseDTO
+            {
+                Message = "Followed successfully",
+                UserFollowing = userFollowing.UserName,
+                UserFollowed = userFollowed.UserName
+            };
+
+            return Ok(new { response });
+        }
+        
+
+
+
+
+
+    
+    } 
+    
+} 
+
+

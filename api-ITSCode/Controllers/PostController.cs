@@ -5,7 +5,7 @@ using entity_library;
 namespace apiPost.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("Post")]
     public class PostController : ControllerBase
     {
         private readonly ILogger<PostController> _logger;
@@ -19,7 +19,7 @@ namespace apiPost.Controllers
 
 
 
-        [HttpGet("")]
+        [HttpGet("getById")]
         public GetPostResponseDTO getPost([FromQuery] GetPostRequestDTO request)
         {
             Post post = this.df.CreateDAOPost().GetPostById(request.Id);
@@ -42,15 +42,20 @@ namespace apiPost.Controllers
 
         }
 
-        [HttpPost("")]
-        public PostPostResponseDTO PostPost([FromQuery] PostPostRequestDTO request)
+        [HttpPost("Create")]
+        public PostPostResponseDTO PostCreate([FromQuery] PostPostRequestDTO request)
         {
+            File file = new File
+            {
+                Url = request.fileUrl
+            };
+
             Post newPost = new Post
             {
                 Title = request.title,
                 Content = request.content,
                 User = this.df.CreateDAOUser().GetUser(1),
-                File = this.df.CreateDAOFile().GetFile(request.fileUrl)
+                File = file
             };
 
             this.df.CreateDAOPost().CreatePost(newPost);
@@ -66,7 +71,7 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpDelete("")]
+        [HttpDelete("Delete")]
         public DeletePostResponseDTO DeletePost([FromQuery] DeletePostRequestDTO request)
         {
             Post post = this.df.CreateDAOPost().GetPostById(request.id);

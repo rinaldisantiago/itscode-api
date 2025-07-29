@@ -14,7 +14,7 @@ namespace dao_library
             MockImageDAO imageDAO = new MockImageDAO();
 
 
-            _users.Add(new User { Id = 1, FullName = "Herhandez Carlos", UserName = "Carlos", Email = "carlos@example.com", Password = "password123", Role = roleDAO.GetRoleById(1), Avatar = imageDAO.GetImage("http://example.com/image1.jpg") });
+            _users.Add(new User { Id = 1, FullName = "Herhandez Carlos", UserName = "Carlos", Email = "carlos@example.com", Password = "password123456", Role = roleDAO.GetRoleById(1), Avatar = imageDAO.GetImage("http://example.com/image1.jpg") });
             _users.Add(new User { Id = 2, FullName = "Hernandez Joaquin", UserName = "Joaco", Email = "joaco@example.com", Password = "password456", Role = roleDAO.GetRoleById(2), Avatar = imageDAO.GetImage("http://example.com/image2.jpg") });
         }
 
@@ -27,7 +27,7 @@ namespace dao_library
         {
             return _users.FirstOrDefault(u => u.Id == idUser);
         }
-        
+
         public User GetUserByEmail(string email)
         {
             return _users.FirstOrDefault(u => u.Email == email);
@@ -53,7 +53,7 @@ namespace dao_library
             }
             return existingUser;
         }
-        
+
         public void DeleteUser(int idUser)
         {
             User user = GetUser(idUser);
@@ -61,6 +61,16 @@ namespace dao_library
             {
                 _users.Remove(user);
             }
+        }
+        
+        public User GetUserByUsernameAndPassword(string userName, string password)
+        {
+            if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(password))
+            {
+                return null;
+            }
+
+            return _users.FirstOrDefault(u => u.UserName == userName && u.Password == password);
         }
     }
 }
