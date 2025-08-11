@@ -42,6 +42,36 @@ namespace apiPost.Controllers
 
         }
 
+        [HttpGet("getAll")]
+        public GetAllPostResponseDTO getAll([FromQuery] GetAllPostResquestDTO request)
+        {
+            List<Post> allPosts = this.df.CreateDAOPost().getAll();
+            List<GetPostResponseDTO> posts = new List<GetPostResponseDTO>();
+
+            foreach (Post post in allPosts){
+                
+                GetPostResponseDTO getPost = new GetPostResponseDTO
+                {
+                    title = post.Title,
+                    content = post.Content,
+                    userName = post.UserName,
+                    userAvatar = post.userAvatar,
+                    commentsCount = post.GetCountComments(),
+                    likes = post.GetCountLike(),
+                    dislikes = post.GetCountDislike(),
+                    fileUrl = post.File?.Url ?? "",
+                    comments = post.GetComments()
+                };
+                posts.Add(getPost);
+            }
+
+            GetAllPostResponseDTO response = new GetAllPostResponseDTO
+            {
+                Posts = posts
+            };
+            return response;
+        }
+
         [HttpPost("Create")]
         public PostPostResponseDTO PostCreate([FromQuery] PostPostRequestDTO request)
         {

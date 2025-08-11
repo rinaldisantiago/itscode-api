@@ -132,7 +132,7 @@ namespace dao_library
             }
         }
 
-        public IEnumerable<Post> GetAllPosts()
+        public List<Post> getAll()
         {
             return _Posts;
         }
