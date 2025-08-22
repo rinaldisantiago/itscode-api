@@ -13,6 +13,8 @@ namespace dao_library
             // Initialize with some mock data if needed
             _images.Add(new Image { Id = 1, Url = "http://example.com/image1.jpg" });
             _images.Add(new Image { Id = 2, Url = "http://example.com/image2.jpg" });
+            _images.Add(new Image { Id = 3, Url = "https://img2.wallspic.com/previews/4/1/9/4/7/174914/174914-dragon_ball-goku-cartel-saiyajin-super_saiyajin-x750.jpg" });
+
         }
 
         public Image? GetImage(string url)

@@ -14,14 +14,11 @@ namespace dao_library
             MockImageDAO imageDAO = new MockImageDAO();
 
 
-            _users.Add(new User { Id = 1, FullName = "Herhandez Carlos", UserName = "Carlos", Email = "carlos@example.com", Password = "password123456", Role = roleDAO.GetRoleById(1), Avatar = imageDAO.GetImage("http://example.com/image1.jpg") });
+            _users.Add(new User { Id = 1, FullName = "Herhandez Carlos", UserName = "Carlos", Email = "carlos@example.com", Password = "password123456", Role = roleDAO.GetRoleById(1), Avatar = imageDAO.GetImage("https://img2.wallspic.com/previews/4/1/9/4/7/174914/174914-dragon_ball-goku-cartel-saiyajin-super_saiyajin-x750.jpg") });
             _users.Add(new User { Id = 2, FullName = "Hernandez Joaquin", UserName = "Joaco", Email = "joaco@example.com", Password = "password456", Role = roleDAO.GetRoleById(2), Avatar = imageDAO.GetImage("http://example.com/image2.jpg") });
         }
 
-        // public List<User> GetAll()
-        // {
-        //     return _users;
-        // }
+        
 
         public User GetUser(int idUser)
         {

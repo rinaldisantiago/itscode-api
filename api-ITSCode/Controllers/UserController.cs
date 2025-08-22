@@ -55,7 +55,7 @@ namespace apiUser.Controllers
 
 
         [HttpGet("get")]
-        public GetUserResponseDTO getUser([FromQuery] GetUserRequestDTO request)
+        public IActionResult getUser([FromQuery] GetUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.Id);
             if (user == null) return null;
@@ -68,7 +68,7 @@ namespace apiUser.Controllers
                 urlAvatar = user.GetAvatar
             };
 
-            return response;
+            return Ok(response);
         }
 
         [HttpPut("update")]

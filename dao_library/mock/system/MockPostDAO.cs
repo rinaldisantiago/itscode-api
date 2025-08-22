@@ -19,10 +19,10 @@ namespace dao_library
             User user2 = userDAO.GetUser(2);
 
             MockFileDAO fileDAO = new MockFileDAO();
-            File file1 = fileDAO.GetFile("http://example.com/image1.jpg");
+            File file1 = fileDAO.GetFile("http://localhost:5052/img/juntada-con-amigos-min.webp");
             File file2 = fileDAO.GetFile("http://example.com/image2.jpg");
 
-            // Usuarios de prueba
+
             _Posts.Add(new Post { Id = 1, Title = "Mi Primer post", Content = "Este es mi primer posteo de prueba", User = user1, Comments = new List<Comment>(), Interactions = new List<Interaction>(), File = file1 });
             _Posts.Add(new Post { Id = 2, Title = "Un hermoso dia de lluvia", Content = "Hoy me toco caminar hasta mi casa bajo la lluvia", User = user2, Comments = new List<Comment>(), Interactions = new List<Interaction>(), File = file2 });
 
@@ -82,6 +82,7 @@ namespace dao_library
                 User = user1,
                 InteractionType = InteractionType.Like
             };
+            
             Interaction interaction4 = new Interaction
             {
                 Id = 4,
@@ -103,7 +104,6 @@ namespace dao_library
             var post = _Posts.FirstOrDefault(p => p.Id == id);
             if (post != null)
             {
-                // Filtrar comentarios que pertenecen a este post
                 List<Comment> postComments = _Comments.Where(c => c.Post.Id == id).ToList();
                 post.Comments = postComments;
                 List<Interaction> postInteractions = _Interactions.Where(i => i.Post.Id == id).ToList();
@@ -134,8 +134,22 @@ namespace dao_library
 
         public List<Post> getAll()
         {
+            foreach (var post in _Posts)
+            {
+                List<Comment> postComments = _Comments
+                .Where(c => c.Post.Id == post.Id)
+                .ToList();
+                post.Comments = postComments;
+
+                List<Interaction> postInteractions = _Interactions
+                .Where(i => i.Post.Id == post.Id)
+                .ToList();
+                post.Interactions = postInteractions;
+            }
+
             return _Posts;
         }
+
 
         public void CreatePost(Post post)
         {
