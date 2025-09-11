@@ -11,7 +11,7 @@ namespace dao_library
         public MockFileDAO()
         {
             // Initialize with some mock data if needed
-            _files.Add(new File { Id = 1, Url = "http://localhost:5052/img/juntada-con-amigos-min.webp" });
+            _files.Add(new File { Id = 1, Url = "https://definicion.de/wp-content/uploads/2012/01/imagen-vectorial.png" });
             _files.Add(new File { Id = 2, Url = "http://example.com/image2.jpg" });
         }
 

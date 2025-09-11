@@ -18,14 +18,15 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpGet("getById")]
-        public IActionResult getPost([FromQuery] GetPostRequestDTO request)
+        [HttpGet("get")]
+        public IActionResult Post([FromQuery] int id)
         {
-            Post post = this.df.CreateDAOPost().GetPostById(request.Id);
+            Post post = this.df.CreateDAOPost().GetPostById(id);
             if (post == null) return null;
 
             GetPostResponseDTO response = new GetPostResponseDTO
             {
+                IdUser = post.IdUser,
                 title = post.Title,
                 content = post.Content,
                 userName = post.UserName,
@@ -41,20 +42,78 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpGet("getAll")]
-        public IActionResult getAll([FromQuery] GetAllPostResquestDTO request)
-        {
-            List<Post> allPosts = this.df.CreateDAOPost().getAll();
-            List<GetPostResponseDTO> posts = new List<GetPostResponseDTO>();
+        // [HttpGet("getAll")]
+        // public IActionResult getAll([FromQuery] GetAllPostRequestDTO request)
+        // {
+        //     List<Post> allPosts = this.df.CreateDAOPost().getAll();
+        //     List<GetPostResponseDTO> posts = new List<GetPostResponseDTO>();
 
-            foreach (Post post in allPosts)
+        //     foreach (Post post in allPosts)
+        //     {
+        //         GetPostResponseDTO getPost = new GetPostResponseDTO
+        //         {
+        //             title = post.Title,
+        //             content = post.Content,
+        //             userName = post.UserName,
+        //             userAvatar = post.userAvatar,
+        //             commentsCount = post.GetCountComments(),
+        //             likes = post.GetCountLike(),
+        //             dislikes = post.GetCountDislike(),
+        //             fileUrl = post.GetUrlImage() ?? "",
+        //             comments = post.GetComments()
+        //         };
+
+        //         posts.Add(getPost);
+        //     }
+
+        //     GetAllPostResponseDTO response = new GetAllPostResponseDTO
+        //     {
+        //         Posts = posts
+        //     };
+
+        //     return Ok (response);
+        // }
+
+        [HttpGet]
+        public IActionResult getAllPosts([FromQuery] GetAllPostRequestDTO request)
+        {
+            int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
+            
+            
+            List<GetPostResponseDTO> postsAll = new List<GetPostResponseDTO>();
+
+            List<Post> posts = new List<Post>();
+
+            if (request.idUserLogger != 0)
             {
-                GetPostResponseDTO getPost = new GetPostResponseDTO
+                //TODO: menejar token previamente
+                if (request.isMyPosts)
                 {
-                    title = post.Title,
-                    content = post.Content,
+                    // Traer solo los posts del usuario logueado
+                    posts = this.df.CreateDAOPost().GetPosts(new List<int> { request.idUserLogger });
+                }
+                else
+                {
+                    // Traer los posts de los usuarios seguidos
+                    var followedIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
+                    posts = this.df.CreateDAOPost().GetPosts(followedIds);
+                }
+
+            } else{
+                // Traer todos los posts
+                posts = this.df.CreateDAOPost().GetPosts(new List<int> { request.idUserConsultado});
+            }
+            
+
+            foreach (Post post in posts)
+            {
+                GetPostResponseDTO getPosts = new GetPostResponseDTO
+                {
+                    IdUser = post.IdUser,
                     userName = post.UserName,
                     userAvatar = post.userAvatar,
+                    title = post.Title,
+                    content = post.Content,
                     commentsCount = post.GetCountComments(),
                     likes = post.GetCountLike(),
                     dislikes = post.GetCountDislike(),
@@ -62,18 +121,25 @@ namespace apiPost.Controllers
                     comments = post.GetComments()
                 };
 
-                posts.Add(getPost);
+                postsAll.Add(getPosts);
             }
 
-            GetAllPostResponseDTO response = new GetAllPostResponseDTO
+            postsAll = postsAll
+            .OrderByDescending(p => p.commentsCount) 
+            .Skip((int)((pageNumber - 1) * 10))
+            .Take(10)
+            .ToList();
+
+
+           GetAllPostResponseDTO response = new GetAllPostResponseDTO
             {
-                Posts = posts
+                Posts = postsAll
             };
 
-            return Ok (response);
+            return Ok(response);
         }
 
-        [HttpPost("Create")]
+        [HttpPost]
         public IActionResult PostCreate([FromQuery] PostPostRequestDTO request)
         {
             File file = new File
@@ -101,7 +167,7 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpDelete("Delete")]
+        [HttpDelete]
         public IActionResult DeletePost([FromQuery] DeletePostRequestDTO request)
         {
             Post post = this.df.CreateDAOPost().GetPostById(request.id);

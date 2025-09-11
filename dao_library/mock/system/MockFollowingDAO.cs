@@ -6,7 +6,7 @@ namespace dao_library
 {
     public class MockFollowingDAO : DAOFollowing
     {
-        private  List<Following> _Followings = new List<Following>();
+        private List<Following> _Followings = new List<Following>();
 
         public MockFollowingDAO()
         {
@@ -43,7 +43,7 @@ namespace dao_library
             }
         }
 
-        public IEnumerable<Following> GetAllFollowings()
+        public List<Following> GetAllFollowings()
         {
             return _Followings;
         }
@@ -53,5 +53,15 @@ namespace dao_library
             following.Id = _Followings.Max(f => f.Id) + 1;
             _Followings.Add(following);
         }
+        
+        public List<int> GetFollowedUserIds(int userId)
+        {
+            return _Followings
+                .Where(f => f.UserFollowing.Id == userId)  // Buscar a quiénes sigue este usuario
+                .Select(f => f.UserFollowed.Id)            // Devolver los IDs de los seguidos
+                .ToList();
+        }
+
+
     }
 }

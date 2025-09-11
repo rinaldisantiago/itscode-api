@@ -6,7 +6,7 @@ namespace dao_library
 {
     public class MockUserDAO : DAOUser
     {
-        private readonly List<User> _users = new List<User>();
+        private static List<User> _users = new List<User>();
 
         public MockUserDAO()
         {

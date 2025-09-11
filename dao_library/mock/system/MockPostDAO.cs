@@ -19,7 +19,7 @@ namespace dao_library
             User user2 = userDAO.GetUser(2);
 
             MockFileDAO fileDAO = new MockFileDAO();
-            File file1 = fileDAO.GetFile("http://localhost:5052/img/juntada-con-amigos-min.webp");
+            File file1 = fileDAO.GetFile("https://definicion.de/wp-content/uploads/2012/01/imagen-vectorial.png");
             File file2 = fileDAO.GetFile("http://example.com/image2.jpg");
 
 
@@ -101,6 +101,7 @@ namespace dao_library
 
         public Post GetPostById(int id)
         {
+            
             var post = _Posts.FirstOrDefault(p => p.Id == id);
             if (post != null)
             {
@@ -132,23 +133,45 @@ namespace dao_library
             }
         }
 
-        public List<Post> getAll()
-        {
-            foreach (var post in _Posts)
-            {
-                List<Comment> postComments = _Comments
-                .Where(c => c.Post.Id == post.Id)
-                .ToList();
-                post.Comments = postComments;
+        // public List<Post> getAll()
+        // {
+        //     foreach (var post in _Posts)
+        //     {
+        //         List<Comment> postComments = _Comments
+        //         .Where(c => c.Post.Id == post.Id)
+        //         .ToList();
+        //         post.Comments = postComments;
 
-                List<Interaction> postInteractions = _Interactions
-                .Where(i => i.Post.Id == post.Id)
+        //         List<Interaction> postInteractions = _Interactions
+        //         .Where(i => i.Post.Id == post.Id)
+        //         .ToList();
+        //         post.Interactions = postInteractions;
+        //     }
+
+        //     return _Posts;
+        // }
+
+        public List<Post> GetPosts(List<int> userIds)
+        {
+            var posts = _Posts
+                .Where(p => userIds.Contains(p.User.Id))  // filtra por la lista de usuarios
                 .ToList();
-                post.Interactions = postInteractions;
+
+            foreach (var post in posts)
+            {
+                post.Comments = _Comments
+                    .Where(c => c.Post.Id == post.Id)
+                    .ToList();
+
+                post.Interactions = _Interactions
+                    .Where(i => i.Post.Id == post.Id)
+                    .ToList();
             }
 
-            return _Posts;
+            return posts;
         }
+
+
 
 
         public void CreatePost(Post post)

@@ -30,18 +30,20 @@ public class Post
         public string Content { get { return this.content; } set { this.content = value; } }
         private User? user;
         public User? User { get { return this.user; } set { this.user = value; } }
+        private DateTime CreatedAt { get; set; }
+        public DateTime createdAt { get { return this.CreatedAt; } set { this.CreatedAt = value; } }
 
-        public long IdUser
+        public int IdUser
+    {
+        get
         {
-            get
+            if (this.User != null)
             {
-                if (this.User != null)
-                {
-                    return this.User.Id;
-                }
-                return 0;
+                return this.User.Id;
             }
+            return 0;
         }
+    }
 
         public string UserFullName
         {

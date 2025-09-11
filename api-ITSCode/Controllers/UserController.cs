@@ -46,11 +46,11 @@ namespace apiUser.Controllers
             this.df.CreateDAOUser().CreateUser(user);
 
 
-            return Ok(new
+            PostUserResponseDTO response = new PostUserResponseDTO
             {
                 message = "User created successfully",
-                userName = user.FullName
-            });
+            };
+            return Ok(response);
         }
 
 
