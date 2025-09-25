@@ -32,7 +32,7 @@ public class MDAOFactory : DAOFactory
         return new MockImageDAO();
     }
 
-    public DAOfile CreateDAOFile()
+    public DAOFile CreateDAOFile()
     {
         return new MockFileDAO();
     }

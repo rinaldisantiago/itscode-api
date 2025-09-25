@@ -1,6 +1,6 @@
 ﻿using entity_library;
 
-public interface DAOfile
+public interface DAOFile
 {
     // Define methods for managing images in the system
     File CreateFile(string url);

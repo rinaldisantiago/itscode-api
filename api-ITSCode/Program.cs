@@ -12,7 +12,7 @@ string? connectionString = builder.Configuration.GetConnectionString("DefaultCon
 builder.Services.AddDbContext<AppDbContext>(option =>
     option.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
-builder.Services.AddScoped<DAOFactory, MDAOFactory>();
+builder.Services.AddScoped<DAOFactory, EFDAOFactory>();
 
 // Configurar CORS
 builder.Services.AddCors(options =>

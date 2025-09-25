@@ -1,0 +1,41 @@
+using Microsoft.EntityFrameworkCore;
+
+public class EFDAOFollowing : DAOFollowing
+{
+    private AppDbContext dbContext;
+    public EFDAOFollowing(AppDbContext dbContext)
+    {
+        this.dbContext = dbContext;
+    }
+    
+    public void CreateFollowing(Following following)
+    {
+        this.dbContext.Followings.Add(following);
+        dbContext.SaveChanges();
+    }
+
+    public void DeleteFollowing(int id)
+    {
+        this.dbContext.Followings.Where(following => following.Id == id).ExecuteDelete();
+    }
+
+    public List<Following> GetAllFollowings()
+    {
+        return this.dbContext.Followings.ToList();
+    }
+
+    public List<int> GetFollowedUserIds(int userId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Following? GetFollowingById(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void UpdateFollowing(Following following)
+    {
+        this.dbContext.Followings.Update(following);
+    }
+}

@@ -6,6 +6,6 @@ public interface DAOFactory
     // DAOBan CreateDAOBan();
     DAOFollowing CreateDAOFollowing();
     DAOImage CreateDAOImage();
-    DAOfile CreateDAOFile();
+    DAOFile CreateDAOFile();
     
 }

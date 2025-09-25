@@ -116,45 +116,46 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpGet("Login")]
-        public IActionResult Login([FromQuery] LoginRequestDTO request)
+        [HttpPost]
+        public IActionResult Login([FromBody] LoginRequestDTO request)
         {
-            if (String.IsNullOrEmpty(request.userName) || String.IsNullOrEmpty(request.password))
+            try
             {
-               
-                return BadRequest(
-                    new { message = "Username and password are required." }
-                ) ;
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                string encryptedPassword = new User().encript(request.password);
+
+                User user = this.df.CreateDAOUser().Login(request.userName, encryptedPassword);
+
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "Invalid username or password." });
+                }
+
+                LoginResponseDTO response = new LoginResponseDTO
+                {
+                    Id = user.Id,
+                    FullName = user.FullName,
+                    UserName = user.UserName,
+                    Email = user.Email,
+                    UrlAvatar = user.GetAvatar
+                };
+
+                return Ok(new
+                {
+                    message = "Login successful",
+                    user = response
+                });
             }
-
-            string encryptedPassword = new User().encript(request.password);
-
-            User user = this.df.CreateDAOUser().GetUserByUsernameAndPassword(request.userName, encryptedPassword);
-
-
-
-            if (user == null)
+            catch (Exception ex)
             {
-                return BadRequest(
-                   new { message = "Username or password are invalid." }
-               );
+                 return BadRequest(new { message = ex.Message });
             }
-
-            LoginResponseDTO response = new LoginResponseDTO
-            {
-                Id = user.Id,
-                FullName = user.FullName,
-                UserName = user.UserName,
-                Email = user.Email,
-                UrlAvatar = user.GetAvatar
-            };
-
-            return Ok(new
-            {
-                message = "Login successful",
-                user = response
-            }
-            );
         }
+        
+    //TODO: Carlos crea un controller que devuelva los usuairios buscados, que no sean seguidos por el loggeado, paginados, y que filtre tanto por nobre como por username
     }
 }

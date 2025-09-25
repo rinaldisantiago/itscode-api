@@ -151,27 +151,37 @@ namespace dao_library
         //     return _Posts;
         // }
 
-        public List<Post> GetPosts(List<int> userIds)
+        public List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts)
         {
-            var posts = _Posts
-                .Where(p => userIds.Contains(p.User.Id))  // filtra por la lista de usuarios
-                .ToList();
+            // Simula la obtención de posts desde una base de datos
+            //  using var _context = new SocialMediaContext();
+            // IQueryable<Post> query = _context.Posts;
 
-            foreach (var post in posts)
-            {
-                post.Comments = _Comments
-                    .Where(c => c.Post.Id == post.Id)
-                    .ToList();
+            // if (idUserLogger.HasValue && idUserLogger.Value != 0)
+            // {
+            //     if (isMyPosts)
+            //     {
+            //         // 🔹 Traer solo los posts del usuario logueado
+            //         query = query.Where(p => p.IdUser == idUserLogger.Value);
+            //     }
+            //     else
+            //     {
+            //         // 🔹 Traer los posts de los usuarios que sigue
+            //         query = query.Where(p => _context.Followings
+            //             .Any(f => f.FollowerId == idUserLogger.Value && f.FollowedId == p.IdUser));
+            //     }
+            // }
+            // else if (idUserConsultado.HasValue && idUserConsultado.Value != 0)
+            // {
+            //     // 🔹 Traer posts de un usuario específico (consulta)
+            //     query = query.Where(p => p.IdUser == idUserConsultado.Value);
+            // }
 
-                post.Interactions = _Interactions
-                    .Where(i => i.Post.Id == post.Id)
-                    .ToList();
-            }
-
-            return posts;
+            // return query
+            //     .OrderByDescending(p => p.CreatedAt)
+            //     .ToList();
+            return _Posts;
         }
-
-
 
 
         public void CreatePost(Post post)

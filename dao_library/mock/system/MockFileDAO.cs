@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace dao_library
 {
-    public class MockFileDAO : DAOfile
+    public class MockFileDAO : DAOFile
     {
         private readonly List<File> _files = new List<File>();
 

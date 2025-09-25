@@ -6,7 +6,7 @@ public interface DAOPost
     void CreatePost(Post post);
     Post? GetPostById(int id);
 
-    List<Post> GetPosts(List<int> userIds);
+    List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts);
     void UpdatePost(Post post);
     void DeletePost(int id);
     

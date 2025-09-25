@@ -18,7 +18,7 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpGet("get")]
+        [HttpGet("{id}")]
         public IActionResult Post([FromQuery] int id)
         {
             Post post = this.df.CreateDAOPost().GetPostById(id);
@@ -26,7 +26,7 @@ namespace apiPost.Controllers
 
             GetPostResponseDTO response = new GetPostResponseDTO
             {
-                IdUser = post.IdUser,
+                idUser = post.IdUser,
                 title = post.Title,
                 content = post.Content,
                 userName = post.UserName,
@@ -75,69 +75,52 @@ namespace apiPost.Controllers
         // }
 
         [HttpGet]
-        public IActionResult getAllPosts([FromQuery] GetAllPostRequestDTO request)
+        public IActionResult GetPosts([FromQuery] GetAllPostRequestDTO request)
         {
-            int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
-            
-            
-            List<GetPostResponseDTO> postsAll = new List<GetPostResponseDTO>();
-
-            List<Post> posts = new List<Post>();
-
-            if (request.idUserLogger != 0)
+            try
             {
-                //TODO: menejar token previamente
-                if (request.isMyPosts)
-                {
-                    // Traer solo los posts del usuario logueado
-                    posts = this.df.CreateDAOPost().GetPosts(new List<int> { request.idUserLogger });
-                }
-                else
-                {
-                    // Traer los posts de los usuarios seguidos
-                    var followedIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
-                    posts = this.df.CreateDAOPost().GetPosts(followedIds);
-                }
+                int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
 
-            } else{
-                // Traer todos los posts
-                posts = this.df.CreateDAOPost().GetPosts(new List<int> { request.idUserConsultado});
-            }
-            
+                List<Post> posts;
 
-            foreach (Post post in posts)
-            {
-                GetPostResponseDTO getPosts = new GetPostResponseDTO
+                posts = this.df.CreateDAOPost().GetPosts(
+                    request.idUserConsultado,
+                    request.idUserLogger,
+                    request.isMyPosts
+                );
+
+                var postsAll = posts
+                    .Select(post => new GetPostResponseDTO
+                    {
+                        idUser = post.IdUser,
+                        userName = post.UserName,
+                        userAvatar = post.userAvatar,
+                        title = post.Title,
+                        content = post.Content,
+                        commentsCount = post.GetCountComments(),
+                        likes = post.GetCountLike(),
+                        dislikes = post.GetCountDislike(),
+                        fileUrl = post.GetUrlImage() ?? "",
+                        comments = post.GetComments()
+                    })
+                    .OrderByDescending(p => p.commentsCount)
+                    .Skip((pageNumber - 1) * 10)
+                    .Take(10)
+                    .ToList();
+
+                var response = new GetAllPostResponseDTO
                 {
-                    IdUser = post.IdUser,
-                    userName = post.UserName,
-                    userAvatar = post.userAvatar,
-                    title = post.Title,
-                    content = post.Content,
-                    commentsCount = post.GetCountComments(),
-                    likes = post.GetCountLike(),
-                    dislikes = post.GetCountDislike(),
-                    fileUrl = post.GetUrlImage() ?? "",
-                    comments = post.GetComments()
+                    Posts = postsAll
                 };
 
-                postsAll.Add(getPosts);
+                return Ok(response);
             }
-
-            postsAll = postsAll
-            .OrderByDescending(p => p.commentsCount) 
-            .Skip((int)((pageNumber - 1) * 10))
-            .Take(10)
-            .ToList();
-
-
-           GetAllPostResponseDTO response = new GetAllPostResponseDTO
+            catch (Exception ex)
             {
-                Posts = postsAll
-            };
-
-            return Ok(response);
+                return StatusCode(500, new { message = "An unexpected error occurred." });
+            }
         }
+
 
         [HttpPost]
         public IActionResult PostCreate([FromQuery] PostPostRequestDTO request)
