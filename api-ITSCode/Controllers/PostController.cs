@@ -30,7 +30,7 @@ namespace apiPost.Controllers
                 title = post.Title,
                 content = post.Content,
                 userName = post.UserName,
-                userAvatar = post.userAvatar,
+                userAvatar = post.UserAvatar(),
                 commentsCount = post.GetCountComments(),
                 likes = post.GetCountLike(),
                 dislikes = post.GetCountDislike(),
@@ -94,7 +94,7 @@ namespace apiPost.Controllers
                     {
                         idUser = post.IdUser,
                         userName = post.UserName,
-                        userAvatar = post.userAvatar,
+                        userAvatar = post.UserAvatar(),
                         title = post.Title,
                         content = post.Content,
                         commentsCount = post.GetCountComments(),
@@ -117,7 +117,13 @@ namespace apiPost.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "An unexpected error occurred." });
+                
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred.",
+                    error = ex.Message,// Esto mostrará el mensaje del error
+                    
+                });
             }
         }
 
@@ -134,7 +140,7 @@ namespace apiPost.Controllers
             {
                 Title = request.title,
                 Content = request.content,
-                User = this.df.CreateDAOUser().GetUser(1),
+                User = this.df.CreateDAOUser().GetUser(request.idUser),
                 File = file
             };
 

@@ -23,7 +23,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAOPost CreateDAOPost()
     {
-        throw new NotImplementedException();
+        return new EFDAOPost(this.appDbContext);    
     }
 
     public DAORole CreateDAORole()

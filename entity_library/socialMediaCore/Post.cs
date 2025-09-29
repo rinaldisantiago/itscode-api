@@ -28,22 +28,22 @@ public class Post
         public string Title { get { return this.title; } set { this.title = value; } }
         private string content = "";
         public string Content { get { return this.content; } set { this.content = value; } }
-        private User? user;
-        public User? User { get { return this.user; } set { this.user = value; } }
-        private DateTime CreatedAt { get; set; }
-        public DateTime createdAt { get { return this.CreatedAt; } set { this.CreatedAt = value; } }
+        private User user;
+        public User User { get { return this.user; } set { this.user = value; } }
+        private DateTime createdAt { get; set; }
+        public DateTime CreatedAt { get { return this.createdAt; } set { this.createdAt = value; } }
 
         public int IdUser
-    {
-        get
         {
-            if (this.User != null)
+            get
             {
-                return this.User.Id;
+                if (this.User != null)
+                {
+                    return this.User.Id;
+                }
+                return 0;
             }
-            return 0;
         }
-    }
 
         public string UserFullName
         {
@@ -70,16 +70,13 @@ public class Post
         }
 
 
-        public string userAvatar
+        public string UserAvatar()
         {
-            get
+            if (this.User != null && this.User.Avatar != null)
             {
-                if (this.User != null && this.User.Avatar != null)
-                {
-                    return this.User.Avatar.Url;
-                }
-                return "No se encuentra ninguna imagen";
+                return this.User.Avatar.Url;
             }
+            return "No se encuentra ninguna imagen";
         }
 
 

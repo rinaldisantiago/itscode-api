@@ -151,7 +151,7 @@ namespace dao_library
         //     return _Posts;
         // }
 
-        public List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts)
+        public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts)
         {
             // Simula la obtención de posts desde una base de datos
             //  using var _context = new SocialMediaContext();

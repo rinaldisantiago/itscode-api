@@ -26,10 +26,49 @@ public class EFDAOPost : DAOPost
     }
 
 
-    public List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts)
+    // public List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts)
+    // {
+    //     throw new NotImplementedException();
+    // }
+
+    public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts)
     {
-        throw new NotImplementedException();
+        IQueryable<Post> query = this.dbContext.Posts
+            .Include(p => p.User).ThenInclude(u => u.Avatar)  
+            .Include(p => p.File)                  
+            .Include(p => p.Comments)             
+            .Include(p => p.Interactions);        
+
+        if (idUserLogger != 0)
+        {
+            if (isMyPosts)
+            {
+                
+                query = query.Where(p => p.User.Id == idUserLogger);
+            }
+            else
+            {
+               
+                var followingIds = this.dbContext.Followings
+                    .Where(f => f.UserFollowing.Id == idUserLogger)
+                    .Select(f => f.UserFollowed.Id);
+
+
+                query = query.Where(p => followingIds.Contains(p.User.Id));
+            }
+        }
+        else if (idUserConsultado != 0)
+        {
+            
+            query = query.Where(p => p.User.Id == idUserConsultado);
+        }
+
+        return query
+            .OrderByDescending(p => p.CreatedAt)
+            .ToList();
     }
+
+
 
     public void UpdatePost(Post post)
     {
