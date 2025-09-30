@@ -30,16 +30,13 @@ public class User : Person
         }
     }
 
-    public string GetAvatar
+    public string GetAvatar()
     {
-        get
-        {
             if (this.Avatar != null)
             {
                 return this.Avatar.Url;
             }
             return "No avatar assigned";
-        }
     }
 
     public string encript(string password)

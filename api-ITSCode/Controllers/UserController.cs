@@ -65,7 +65,7 @@ namespace apiUser.Controllers
                 fullName = user.FullName,
                 userName = user.UserName,
                 email = user.Email,
-                urlAvatar = user.GetAvatar
+                urlAvatar = user.GetAvatar()
             };
 
             return Ok(response);
@@ -90,7 +90,7 @@ namespace apiUser.Controllers
                 fullName = updateUser.FullName,
                 userName = updateUser.UserName,
                 email = updateUser.Email,
-                urlAvatar = updateUser.GetAvatar
+                urlAvatar = updateUser.GetAvatar()
             };
 
             return Ok(response);
@@ -141,7 +141,7 @@ namespace apiUser.Controllers
                     FullName = user.FullName,
                     UserName = user.UserName,
                     Email = user.Email,
-                    UrlAvatar = user.GetAvatar
+                    UrlAvatar = user.GetAvatar()
                 };
 
                 return Ok(new
