@@ -14,10 +14,6 @@ builder.Services.AddDbContext<AppDbContext>(option =>
     option.UseLazyLoadingProxies()
           .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
 });
-<<<<<<< HEAD
-
-=======
->>>>>>> development
 
 builder.Services.AddScoped<DAOFactory, EFDAOFactory>();
 
