@@ -10,7 +10,10 @@ builder.Services.AddSwaggerGen();
 string? connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(option =>
-    option.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+{
+    option.UseLazyLoadingProxies()
+          .UseMySql(connectionString, ServerVersion.AutoDetect(connectionString));
+});
 
 builder.Services.AddScoped<DAOFactory, EFDAOFactory>();
 
