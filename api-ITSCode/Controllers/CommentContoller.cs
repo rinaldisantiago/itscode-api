@@ -53,8 +53,20 @@ namespace apiComment.Controllers
             }
         }
 
+        [HttpDelete]
+        public IActionResult DeleteComment([FromQuery] DeleteCommentRequestDTO request)
+        {
+            Comment comment = this.df.CreateDAOComment().GetCommentById(request.id);
+            if (comment == null) return NotFound();
 
+            this.df.CreateDAOComment().DeleteComment(request.id);
 
-        
+            DeleteCommentResponseDTO response = new DeleteCommentResponseDTO
+            {
+                message = "Comment deleted successfully"
+            };
+
+            return Ok(response);
+        }
     }
 }
