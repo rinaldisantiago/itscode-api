@@ -141,7 +141,8 @@ namespace apiPost.Controllers
                 Title = request.title,
                 Content = request.content,
                 User = this.df.CreateDAOUser().GetUser(request.idUser),
-                File = file
+                File = file,
+                CreatedAt = DateTime.Now
             };
 
             this.df.CreateDAOPost().CreatePost(newPost);

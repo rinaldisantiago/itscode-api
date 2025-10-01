@@ -7,5 +7,6 @@ public interface DAOFactory
     DAOFollowing CreateDAOFollowing();
     DAOImage CreateDAOImage();
     DAOFile CreateDAOFile();
+    DAOComment CreateDAOComment();
     
 }

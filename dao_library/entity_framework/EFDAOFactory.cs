@@ -23,7 +23,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAOPost CreateDAOPost()
     {
-        return new EFDAOPost(this.appDbContext);    
+        return new EFDAOPost(this.appDbContext);
     }
 
     public DAORole CreateDAORole()
@@ -34,5 +34,10 @@ public class EFDAOFactory : DAOFactory
     public DAOUser CreateDAOUser()
     {
         return new EFDAOUser(this.appDbContext);
+    }
+    
+    public DAOComment CreateDAOComment()
+    {
+        return new EFDAOComment(this.appDbContext);
     }
 }

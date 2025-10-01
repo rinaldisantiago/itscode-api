@@ -2,6 +2,7 @@ using dao_library;
 
 public class MDAOFactory : DAOFactory
 {
+
     public DAOUser CreateDAOUser()
     {
         return new MockUserDAO();
@@ -36,5 +37,10 @@ public class MDAOFactory : DAOFactory
     {
         return new MockFileDAO();
     }
+    public DAOComment CreateDAOComment()
+    {
+        return new MockCommentDAO();
+    }
+    
 
 }
