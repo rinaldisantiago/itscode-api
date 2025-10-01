@@ -9,9 +9,9 @@ public class Interaction
 
 
     public int Id { get { return this.id; } set { this.id = value; } }
-    public InteractionType InteractionType { get { return this.interactionType; } set { this.interactionType = value; } }
+    public virtual InteractionType InteractionType { get { return this.interactionType; } set { this.interactionType = value; } }
 
-    public Post? Post { get { return this.post; } set { this.post = value; } }
-    public User? User { get { return this.user; } set { this.user = value; } }
+    public virtual Post? Post { get { return this.post; } set { this.post = value; } }
+    public virtual User? User { get { return this.user; } set { this.user = value; } }
 }
 

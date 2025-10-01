@@ -5,6 +5,6 @@ public class PostUserRequestDTO
     public string Email { get; set; }
     public string Password { get; set; }
     public int? RoleId { get; set; }
-    public string URLAvatar { get; set; }
+    public string? URLAvatar { get; set; } = "";
    
 }

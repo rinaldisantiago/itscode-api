@@ -12,9 +12,9 @@ public class Comment
 
     public int Id { get => this.id; set => this.id = value; }
     public string? Content { get => this.content; set => this.content = value; }
-    public Post? Post { get { return this.post; } set { this.post = value; } }
-    public User? User { get { return this.user; } set { this.user = value; } }
-    public DateTime CreatedAt { get => this.createdAt; set => this.createdAt = value; }
+    public virtual Post? Post { get { return this.post; } set { this.post = value; } }
+    public virtual User? User { get { return this.user; } set { this.user = value; } }
+    public virtual DateTime CreatedAt { get => this.createdAt; set => this.createdAt = value; }
 
     
 }

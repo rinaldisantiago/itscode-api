@@ -29,9 +29,9 @@ public class Post
     private string content = "";
     public string Content { get { return this.content; } set { this.content = value; } }
     private User user;
-    public User User { get { return this.user; } set { this.user = value; } }
-    private DateTime createdAt { get; set; }
-    public DateTime CreatedAt { get { return this.createdAt; } set { this.createdAt = value; } }
+    public virtual User User { get { return this.user; } set { this.user = value; } }
+    private  DateTime createdAt { get; set; }
+    public virtual DateTime CreatedAt { get { return this.createdAt; } set { this.createdAt = value; } }
 
     public int IdUser
     {
@@ -80,8 +80,8 @@ public class Post
     }
 
 
-    private List<Interaction>? interactions;
-    public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
+    private  List<Interaction>? interactions;
+    public virtual List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
 
     // public object GetInteractions()
     // {
@@ -113,7 +113,7 @@ public class Post
 
 
     private List<Comment>? comments;
-    public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
+    public virtual List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
 
     public List<object> GetComments()
     {
@@ -140,7 +140,7 @@ public class Post
 
 
     private File? file;
-    public File? File { get { return this.file; } set { this.file = value; } }
+    public virtual File? File { get { return this.file; } set { this.file = value; } }
     public long IdFile
     {
         get
