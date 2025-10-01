@@ -13,8 +13,8 @@ public class User : Person
     public string UserName { get { return this.userName; } set { this.userName = value; } }
     public string Email { get { return this.email; } set { this.email = value; } }
     public string Password { get { return this.password; } set { this.password = value; } }
-    public Role? Role { get { return this.role; } set { this.role = value; } }
-    public Image? Avatar { get { return this.avatar; } set { this.avatar = value; } }
+    public virtual Role? Role { get { return this.role; } set { this.role = value; } }
+    public virtual Image? Avatar { get { return this.avatar; } set { this.avatar = value; } }
 
 
     public string GetRole

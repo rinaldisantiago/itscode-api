@@ -33,11 +33,8 @@ public class EFDAOPost : DAOPost
 
     public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts)
     {
-        IQueryable<Post> query = this.dbContext.Posts
-            .Include(p => p.User).ThenInclude(u => u.Avatar)  
-            .Include(p => p.File)                  
-            .Include(p => p.Comments)             
-            .Include(p => p.Interactions);        
+        IQueryable<Post> query = this.dbContext.Posts;
+                 
 
         if (idUserLogger != 0)
         {
