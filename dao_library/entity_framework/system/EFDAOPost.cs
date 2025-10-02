@@ -40,18 +40,18 @@ public class EFDAOPost : DAOPost
         {
             if (isMyPosts)
             {
-                
+
                 query = query.Where(p => p.User.Id == idUserLogger);
             }
             else
             {
-               
-                var followingIds = this.dbContext.Followings
+
+                var followedIds = this.dbContext.Followings
                     .Where(f => f.UserFollowing.Id == idUserLogger)
                     .Select(f => f.UserFollowed.Id);
 
 
-                query = query.Where(p => followingIds.Contains(p.User.Id));
+                query = query.Where(p => followedIds.Contains(p.User.Id));
             }
         }
         else if (idUserConsultado != 0)
