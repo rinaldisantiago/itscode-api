@@ -13,7 +13,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAOFollowing CreateDAOFollowing()
     {
-        throw new NotImplementedException();
+        return new EFDAOFollowing(this.appDbContext);
     }
 
     public DAOImage CreateDAOImage()

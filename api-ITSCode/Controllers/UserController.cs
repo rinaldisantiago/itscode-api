@@ -19,7 +19,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost("create")]
+        [HttpPost]
         public IActionResult CreateUser([FromBody] PostUserRequestDTO dto)
         {
             Image avatar = new Image
@@ -54,7 +54,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpGet("get")]
+        [HttpGet("{id}")]
         public IActionResult getUser([FromQuery] GetUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.Id);
@@ -71,7 +71,7 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpPut("update")]
+        [HttpPut]
         public IActionResult UpdateUser(int id, [FromBody] PutUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(id);
@@ -96,7 +96,7 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpDelete("delete")]
+        [HttpDelete]
         public IActionResult DeleteUser([FromQuery] DeleteUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.id);
@@ -116,46 +116,68 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost]
-        public IActionResult Login([FromBody] LoginRequestDTO request)
+        // [HttpPost]
+        // public IActionResult Login([FromBody] LoginRequestDTO request)
+        // {
+        //     try
+        //     {
+        //         if (!ModelState.IsValid)
+        //         {
+        //             return BadRequest(ModelState);
+        //         }
+
+        //         string encryptedPassword = new User().encript(request.password);
+
+        //         User user = this.df.CreateDAOUser().Login(request.userName, encryptedPassword);
+
+        //         if (user == null)
+        //         {
+        //             return Unauthorized(new { message = "Invalid username or password." });
+        //         }
+
+        //         LoginResponseDTO response = new LoginResponseDTO
+        //         {
+        //             Id = user.Id,
+        //             FullName = user.FullName,
+        //             UserName = user.UserName,
+        //             Email = user.Email,
+        //             UrlAvatar = user.GetAvatar()
+        //         };
+
+        //         return Ok(new
+        //         {
+        //             message = "Login successful",
+        //             user = response
+        //         });
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         return BadRequest(new { message = ex.Message });
+        //     }
+        // }
+
+        [HttpGet]
+        public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
-            try
+            // Obtener sugerencias desde el DAO
+            List<User> sugerencias = this.df.CreateDAOUser()
+                .GetSugerencias(request.idUserLogger, request.page, request.pageSize);
+
+            // Mapear a DTO de respuesta
+            GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
             {
-                if (!ModelState.IsValid)
+                Sugerencias = sugerencias.Select(u => new UserSuggestionDto
                 {
-                    return BadRequest(ModelState);
-                }
+                    UserName = u.UserName,
+                    Avatar = u.Avatar.Url
+                }).ToList()
+            };
 
-                string encryptedPassword = new User().encript(request.password);
-
-                User user = this.df.CreateDAOUser().Login(request.userName, encryptedPassword);
-
-                if (user == null)
-                {
-                    return Unauthorized(new { message = "Invalid username or password." });
-                }
-
-                LoginResponseDTO response = new LoginResponseDTO
-                {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    UrlAvatar = user.GetAvatar()
-                };
-
-                return Ok(new
-                {
-                    message = "Login successful",
-                    user = response
-                });
-            }
-            catch (Exception ex)
-            {
-                 return BadRequest(new { message = ex.Message });
-            }
+            return Ok(response);
         }
+
+
         
-    //TODO: Carlos crea un controller que devuelva los usuairios buscados, que no sean seguidos por el loggeado, paginados, y que filtre tanto por nobre como por username
+    
     }
 }
