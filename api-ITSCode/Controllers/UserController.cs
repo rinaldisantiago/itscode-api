@@ -26,10 +26,8 @@ namespace apiUser.Controllers
             {
                 Url = dto.URLAvatar
             };
-            Role role = new Role
-            {
-                Id = dto.RoleId ?? 0
-            };
+
+            Role? role = df.CreateDAORole().GetRoleById(dto.RoleId ?? 0);
 
             User user = new User
             {
