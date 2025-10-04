@@ -18,28 +18,28 @@ namespace apiPost.Controllers
         }
 
 
-        [HttpGet("{id}")]
-        public IActionResult Post([FromQuery] int id)
-        {
-            Post post = this.df.CreateDAOPost().GetPostById(id);
-            if (post == null) return null;
+        // [HttpGet("{id}")]
+        // public IActionResult Post([FromQuery] int id)
+        // {
+        //     Post post = this.df.CreateDAOPost().GetPostById(id);
+        //     if (post == null) return null;
 
-            GetPostResponseDTO response = new GetPostResponseDTO
-            {
-                idUser = post.IdUser,
-                title = post.Title,
-                content = post.Content,
-                userName = post.UserName,
-                userAvatar = post.UserAvatar(),
-                commentsCount = post.GetCountComments(),
-                likes = post.GetCountLike(),
-                dislikes = post.GetCountDislike(),
-                fileUrl = post.GetUrlImage() ?? "",
-                comments = post.GetComments()
-            };
+        //     GetPostResponseDTO response = new GetPostResponseDTO
+        //     {
+        //         idUser = post.IdUser,
+        //         title = post.Title,
+        //         content = post.Content,
+        //         userName = post.UserName,
+        //         userAvatar = post.UserAvatar(),
+        //         commentsCount = post.GetCountComments(),
+        //         likes = post.GetCountLike(),
+        //         dislikes = post.GetCountDislike(),
+        //         fileUrl = post.GetUrlImage() ?? "",
+        //         comments = post.GetComments()
+        //     };
 
-            return Ok(response);
-        }
+        //     return Ok(response);
+        // }
 
 
         // [HttpGet("getAll")]

@@ -8,5 +8,6 @@ public interface DAOFactory
     DAOImage CreateDAOImage();
     DAOFile CreateDAOFile();
     DAOComment CreateDAOComment();
+    DAOInteraction CreateDAOInteraction();
     
 }
