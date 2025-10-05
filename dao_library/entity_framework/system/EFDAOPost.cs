@@ -31,7 +31,7 @@ public class EFDAOPost : DAOPost
     //     throw new NotImplementedException();
     // }
 
-    public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts)
+    public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts, int pageNumber, int pageSize)
     {
         IQueryable<Post> query = this.dbContext.Posts;
                  
@@ -60,9 +60,10 @@ public class EFDAOPost : DAOPost
             query = query.Where(p => p.User.Id == idUserConsultado);
         }
 
-        return query
-            .OrderByDescending(p => p.CreatedAt)
-            .ToList();
+        return query.OrderByDescending(p => p.CreatedAt)
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
     }
 
 

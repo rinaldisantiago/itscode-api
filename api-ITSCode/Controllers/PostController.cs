@@ -80,13 +80,16 @@ namespace apiPost.Controllers
             try
             {
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
+                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize; //TODO: ver si es necesario la condicional
 
                 List<Post> posts;
 
                 posts = this.df.CreateDAOPost().GetPosts(
                     request.idUserConsultado,
                     request.idUserLogger,
-                    request.isMyPosts
+                    request.isMyPosts,
+                    pageNumber,
+                    pageSize
                 );
 
                 var postsAll = posts
@@ -103,9 +106,6 @@ namespace apiPost.Controllers
                         fileUrl = post.GetUrlImage() ?? "",
                         comments = post.GetComments()
                     })
-                    .OrderByDescending(p => p.commentsCount)
-                    .Skip((pageNumber - 1) * 10)
-                    .Take(10)
                     .ToList();
 
                 var response = new GetAllPostResponseDTO

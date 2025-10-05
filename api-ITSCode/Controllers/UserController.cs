@@ -20,21 +20,21 @@ namespace apiUser.Controllers
 
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] PostUserRequestDTO dto)
+        public IActionResult CreateUser([FromBody] PostUserRequestDTO request)
         {
             Image avatar = new Image
             {
-                Url = dto.URLAvatar
+                Url = request.URLAvatar
             };
 
             Role? role = df.CreateDAORole().GetRoleById(dto.RoleId ?? 0);
 
             User user = new User
             {
-                FullName = dto.FullName,
-                UserName = dto.Username,
-                Email = dto.Email,
-                Password = dto.Password,
+                FullName = request.FullName,
+                UserName = request.Username,
+                Email = request.Email,
+                Password = request.Password,
                 Role = role,
                 Avatar = avatar
             };

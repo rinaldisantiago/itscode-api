@@ -28,7 +28,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAORole CreateDAORole()
     {
-        throw new NotImplementedException();
+        return new EFDAORole(this.appDbContext);
     }
 
     public DAOUser CreateDAOUser()
