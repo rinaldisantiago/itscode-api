@@ -14,9 +14,9 @@ public class EFDAOFollowing : DAOFollowing
         dbContext.SaveChanges();
     }
 
-    public void DeleteFollowing(int id)
+    public void DeleteFollowing(int idUserFollowing, int idUserFollowed)
     {
-        this.dbContext.Followings.Where(following => following.Id == id).ExecuteDelete();
+        this.dbContext.Followings.Where(following => following.UserFollowing.Id == idUserFollowing && following.UserFollowed.Id == idUserFollowed).ExecuteDelete();
     }
 
     public List<Following> GetAllFollowings()
@@ -27,15 +27,5 @@ public class EFDAOFollowing : DAOFollowing
     public List<int> GetFollowedUserIds(int userId)
     {
         throw new NotImplementedException();
-    }
-
-    public Following? GetFollowingById(int id)
-    {
-        throw new NotImplementedException();
-    }
-
-    public void UpdateFollowing(Following following)
-    {
-        this.dbContext.Followings.Update(following);
     }
 }

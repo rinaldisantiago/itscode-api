@@ -47,13 +47,27 @@ namespace apiPost.Controllers
         }
         
 
+        [HttpDelete]
+        public IActionResult UnfollowUser([FromQuery] UnfollowRequestDTO request)
+        {
+            User? userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
+            User? userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
 
+            if (userFollowing == null || userFollowed == null)
+            {
+                return NotFound("User not found");
+            }
 
+            this.df.CreateDAOFollowing().DeleteFollowing(request.userFollowingId, request.userFollowedId);
 
+            UnfollowResponseDTO response = new UnfollowResponseDTO
+            {
+                message = "Unfollow successfully",
+                userFollowing = userFollowing.UserName,
+                userFollowed = userFollowed.UserName
+            };
 
-    
+            return Ok(response);
+        }
     } 
-    
-} 
-
-
+}
