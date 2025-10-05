@@ -16,9 +16,9 @@ public class EFDAOFile : DAOFile
         return GetFile(url);
     }
 
-    public void DeleteFile(string url)
+    public void DeleteFile(int idFile)
     {
-        this.dbContext.Files.Where(file => file.Url == url).ExecuteDelete();
+        this.dbContext.Files.Where(file => file.Id == idFile).ExecuteDelete();
     }
 
     public File? GetFile(string url)

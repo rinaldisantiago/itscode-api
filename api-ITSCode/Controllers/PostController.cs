@@ -19,23 +19,14 @@ namespace apiPost.Controllers
 
 
         // [HttpGet("{id}")]
-        // public IActionResult Post([FromQuery] int id)
+        // public IActionResult Post([FromQuery] GetPostByIdRequestDTO request)
         // {
-        //     Post post = this.df.CreateDAOPost().GetPostById(id);
+        //     Post post = this.df.CreateDAOPost().GetPostById(request.id);
         //     if (post == null) return null;
 
-        //     GetPostResponseDTO response = new GetPostResponseDTO
+        //     GetPostByIdResponseDTO response = new GetPostByIdResponseDTO
         //     {
-        //         idUser = post.IdUser,
-        //         title = post.Title,
-        //         content = post.Content,
-        //         userName = post.UserName,
-        //         userAvatar = post.UserAvatar(),
-        //         commentsCount = post.GetCountComments(),
-        //         likes = post.GetCountLike(),
-        //         dislikes = post.GetCountDislike(),
-        //         fileUrl = post.GetUrlImage() ?? "",
-        //         comments = post.GetComments()
+        //         post = post
         //     };
 
         //     return Ok(response);
@@ -164,6 +155,7 @@ namespace apiPost.Controllers
             if (post == null) return NotFound();
 
             this.df.CreateDAOPost().DeletePost(request.id);
+            this.df.CreateDAOFile().DeleteFile(post.File.Id);
 
             DeletePostResponseDTO response = new DeletePostResponseDTO
             {

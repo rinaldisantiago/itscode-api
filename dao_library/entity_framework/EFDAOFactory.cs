@@ -8,7 +8,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAOFile CreateDAOFile()
     {
-        throw new NotImplementedException();
+        return new EFDAOFile(this.appDbContext);
     }
 
     public DAOFollowing CreateDAOFollowing()
