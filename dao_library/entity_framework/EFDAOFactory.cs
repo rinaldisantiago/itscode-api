@@ -35,9 +35,13 @@ public class EFDAOFactory : DAOFactory
     {
         return new EFDAOUser(this.appDbContext);
     }
-    
+
     public DAOComment CreateDAOComment()
     {
         return new EFDAOComment(this.appDbContext);
+    }
+    public DAOInteraction CreateDAOInteraction()
+    {
+        return new EFDAOInteraction(this.appDbContext);
     }
 }
