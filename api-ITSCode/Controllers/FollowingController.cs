@@ -17,7 +17,7 @@ namespace apiPost.Controllers
             this.df = df;
         }
 
-        [HttpPost("follow")]
+        [HttpPost]
         public IActionResult FollowUser([FromQuery] FollowRequestDTO request)
         {
             User userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
