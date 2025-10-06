@@ -18,7 +18,7 @@ namespace apiComment.Controllers
             this.df = df;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public IActionResult CreateComment([FromBody] PostCommentRequestDTO request)
         {
             try
@@ -64,6 +64,23 @@ namespace apiComment.Controllers
             DeleteCommentResponseDTO response = new DeleteCommentResponseDTO
             {
                 message = "Comment deleted successfully"
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        public IActionResult UpdateComment([FromBody] UpdateCommentRequestDTO request)
+        {
+            Comment comment = this.df.CreateDAOComment().GetCommentById(request.id);
+            if (comment == null) return NotFound();
+
+            comment.Content = request.content;
+            this.df.CreateDAOComment().UpdateComment(comment);
+
+            UpdateCommentResponseDTO response = new UpdateCommentResponseDTO
+            {
+                message = "Comment updated successfully"
             };
 
             return Ok(response);

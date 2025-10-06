@@ -71,5 +71,6 @@ public class EFDAOPost : DAOPost
     public void UpdatePost(Post post)
     {
         this.dbContext.Posts.Update(post);
+        this.dbContext.SaveChanges();
     }
 }

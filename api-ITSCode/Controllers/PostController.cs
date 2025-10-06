@@ -108,12 +108,12 @@ namespace apiPost.Controllers
             }
             catch (Exception ex)
             {
-                
+
                 return StatusCode(500, new
                 {
                     message = "An unexpected error occurred.",
                     error = ex.Message,// Esto mostrará el mensaje del error
-                    
+
                 });
             }
         }
@@ -161,6 +161,26 @@ namespace apiPost.Controllers
             {
                 message = "Post deleted successfully",
                 idPost = post.Id
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPut]
+        public IActionResult UpdatePost([FromBody] UpdatePostRequestDTO request)
+        {
+            Post post = this.df.CreateDAOPost().GetPostById(request.id);
+            if (post == null) return NotFound();
+
+            post.Title = request.title;
+            post.Content = request.content;
+            post.File.Url = request.fileUrl;
+
+            this.df.CreateDAOPost().UpdatePost(post);
+
+            UpdatePostResponseDTO response = new UpdatePostResponseDTO
+            {
+                message = "Post updated successfully"
             };
 
             return Ok(response);

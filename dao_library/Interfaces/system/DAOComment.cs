@@ -7,5 +7,6 @@ public interface DAOComment
     List<Comment> GetCommentsByPostId(int postId);
 
     void DeleteComment(int id);
+    void UpdateComment(Comment comment);
     
 }

@@ -33,4 +33,14 @@ public class EFDAOComment : DAOComment
     {
         this.dbContext.Coments.Where(comment => comment.Id == id).ExecuteDelete();
     }
+
+    public void UpdateComment(Comment comment)
+    {
+        var existingComment = dbContext.Coments.Find(comment.Id);
+        if (existingComment != null)
+        {
+            existingComment.Content = comment.Content;
+            dbContext.SaveChanges();
+        }
+    }
 }
