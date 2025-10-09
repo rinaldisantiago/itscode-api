@@ -1,3 +1,9 @@
+public class UserInteractionDTO
+{
+    public int interactionId { get; set; }
+    public int interactionType { get; set; } // 1 para Like, 2 para Dislike
+}
+
 public class GetPostResponseDTO
 {
     public int idUser { get; set; }
@@ -11,6 +17,10 @@ public class GetPostResponseDTO
     public string userName { get; set; } = "";
     public string userAvatar { get; set; } = "";
 
-    public List<object> comments { get; set; } 
+    public int idPost { get; set; }
+
+    public UserInteractionDTO? userInteraction { get; set; } 
+
+    public List<object> comments { get; set; }
 
 }

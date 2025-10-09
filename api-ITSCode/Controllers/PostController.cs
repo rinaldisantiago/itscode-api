@@ -71,7 +71,7 @@ namespace apiPost.Controllers
             try
             {
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
-                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize; //TODO: ver si es necesario la condicional
+                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
 
                 List<Post> posts;
 
@@ -83,19 +83,42 @@ namespace apiPost.Controllers
                     pageSize
                 );
 
+                // 🔑 PUNTO CRÍTICO: Mapeo de Posts y la Interacción
                 var postsAll = posts
-                    .Select(post => new GetPostResponseDTO
+                    .Select(post =>
                     {
-                        idUser = post.IdUser,
-                        userName = post.UserName,
-                        userAvatar = post.UserAvatar(),
-                        title = post.Title,
-                        content = post.Content,
-                        commentsCount = post.GetCountComments(),
-                        likes = post.GetCountLike(),
-                        dislikes = post.GetCountDislike(),
-                        fileUrl = post.GetUrlImage() ?? "",
-                        comments = post.GetComments()
+                        // **1. BUSCAR INTERACCIÓN DEL USUARIO LOGUEADO**
+                        // Asumimos que request.idUserLogger tiene el ID del usuario actual.
+                        Interaction? userCurrentInteraction = this.df.CreateDAOInteraction()
+                            .GetInteractionByPostAndUser(post.Id, request.idUserLogger);
+
+                        // **2. CREAR EL DTO DE RESPUESTA**
+                        var postDTO = new GetPostResponseDTO
+                        {
+                            // 🛑 SOLUCIÓN AL NaN: Aseguramos que el ID del Post se incluya en la respuesta.
+                            // Esto corresponde a 'post.idPost' que usa tu frontend.
+                            idPost = post.Id, // <-- Usamos la propiedad 'Id' de la entidad Post
+
+                            // Propiedades existentes
+                            idUser = post.IdUser,
+                            userName = post.UserName,
+                            userAvatar = post.UserAvatar(),
+                            title = post.Title,
+                            content = post.Content,
+                            commentsCount = post.GetCountComments(),
+                            likes = post.GetCountLike(),
+                            dislikes = post.GetCountDislike(),
+                            fileUrl = post.GetUrlImage() ?? "",
+                            comments = post.GetComments(),
+
+                            // **3. ASIGNAR EL ESTADO DE INTERACCIÓN (SOLUCIÓN AL 400)**
+                            userInteraction = userCurrentInteraction != null ? new UserInteractionDTO
+                            {
+                                interactionId = userCurrentInteraction.Id,
+                                interactionType = (int)userCurrentInteraction.InteractionType
+                            } : null
+                        };
+                        return postDTO;
                     })
                     .ToList();
 
@@ -108,12 +131,11 @@ namespace apiPost.Controllers
             }
             catch (Exception ex)
             {
-
+                // ... (Manejo de errores) ...
                 return StatusCode(500, new
                 {
                     message = "An unexpected error occurred.",
-                    error = ex.Message,// Esto mostrará el mensaje del error
-
+                    error = ex.Message,
                 });
             }
         }
@@ -141,7 +163,7 @@ namespace apiPost.Controllers
             PostPostResponseDTO response = new PostPostResponseDTO
             {
                 message = "Post created successfully",
-                IdUser = newPost.User.Id
+                idUser = newPost.User.Id
             };
 
             return Ok(response);

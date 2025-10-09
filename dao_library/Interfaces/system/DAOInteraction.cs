@@ -6,4 +6,6 @@ public interface DAOInteraction
     Interaction CreateInteraction(Interaction interaction);
     Interaction? GetInteractionById(int id);
     void DeleteInteraction(int id);
+
+    Interaction? GetInteractionByPostAndUser(int postId, int userId);
 }
