@@ -31,12 +31,29 @@ namespace apiUser.Controllers
                 return BadRequest(new { message = "Post o usuario no encontrado." });
             }
 
-            // Controlo si la interaccion corresponde a un valor del enum InteractionType
             if (!Enum.IsDefined(typeof(InteractionType), request.interactionType))
             {
                 return BadRequest(new { message = "Tipo de interacción inválido." });
             }
-                    
+
+            // Buscar si ya existe una interacción de este usuario con este post
+            var existingInteractions = post.Interactions
+                .Where(i => i.User.Id == user.Id)
+                .ToList();
+
+            if (existingInteractions.Any())
+            {
+                var existing = existingInteractions.First();
+                if ((int)existing.InteractionType == request.interactionType)
+                {
+                    return BadRequest(new { message = "Ya existe esta interacción para este usuario y post." });
+                }
+                else
+                {
+                    // Eliminar la interacción previa
+                    this.df.CreateDAOInteraction().DeleteInteraction(existing.Id);
+                }
+            }
 
             Interaction interaction = new Interaction
             {
