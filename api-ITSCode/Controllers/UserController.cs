@@ -175,5 +175,40 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
+        [HttpGet("{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
+        public IActionResult GetUsersBySearch([FromRoute] GetAllUsersRequestDTO request)
+        {
+            try
+            {
+                int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
+                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
+
+                List<User> users = this.df.CreateDAOUser().SearchUsers(request.searchTerm, request.idUserLogger, request.pageNumber, request.pageSize);
+                var allUsers = users.Select(user => new GetUsersResponseDTO
+                {
+                    id = user.Id,
+                    userAvatar = user.GetAvatar(),
+                    userName = user.UserName
+                })
+                .ToList();
+
+                var response = new GetAllUsersResponseDTO
+                {
+                    users = allUsers
+                };
+
+                return Ok(response);
+
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred.",
+                    error = ex.Message
+                });
+            }
+        }
+
     }
 }

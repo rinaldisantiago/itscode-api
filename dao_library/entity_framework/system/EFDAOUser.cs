@@ -65,5 +65,17 @@ public class EFDAOUser : DAOUser
         return sugerencias;
     }
 
+    public List<User> SearchUsers(string searchTerm, int idUserLogger ,int pageNumber, int pageSize)
+    {
+        var user = this.dbContext.Users.FirstOrDefault(u => u.Id == idUserLogger);
+        if (user == null) return new List<User>();
 
+        return this.dbContext.Users
+        .Where(u => u.Id != idUserLogger && 
+                    (u.UserName.Trim().ToLower().Contains(searchTerm.Trim().ToLower()) || 
+                     u.FullName.Trim().ToLower().Contains(searchTerm.Trim().ToLower())))
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+    }
 }
