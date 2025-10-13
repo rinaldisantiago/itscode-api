@@ -26,6 +26,9 @@ public class EFDAOFollowing : DAOFollowing
 
     public List<int> GetFollowedUserIds(int userId)
     {
-        throw new NotImplementedException();
+        return dbContext.Followings
+        .Where(f => f.UserFollowing.Id == userId)
+        .Select(f => f.UserFollowed.Id)
+        .ToList();
     }
 }
