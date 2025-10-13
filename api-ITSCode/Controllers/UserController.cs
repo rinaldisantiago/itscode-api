@@ -154,7 +154,7 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Sugerencias")]
         public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
@@ -166,16 +166,14 @@ namespace apiUser.Controllers
             {
                 Sugerencias = sugerencias.Select(u => new UserSuggestionDto
                 {
-                    UserName = u.UserName,
-                    Avatar = u.Avatar.Url
+                    id = u.Id,
+                    userName = u.UserName,
+                    avatar = u.Avatar.Url
                 }).ToList()
             };
 
             return Ok(response);
         }
 
-
-        
-    
     }
 }

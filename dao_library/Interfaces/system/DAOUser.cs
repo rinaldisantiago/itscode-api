@@ -11,5 +11,7 @@ public interface DAOUser
     // User GetUserByUsernameAndPassword(string userName, string password);
     User Login(string userName, string password);
     List<User> GetSugerencias(int idUserLogger, int page, int pageSize);
+    
 }
+    
 

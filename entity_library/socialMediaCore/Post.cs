@@ -83,22 +83,22 @@ public class Post
     private  List<Interaction>? interactions;
     public virtual List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
 
-    // public object GetInteractions()
-    // {
-    //     if (this.Interactions == null)
-    //     {
-    //         return new List<object>();
-    //     }
-    //     return this.Interactions.Select(interaction => new
-    //     {
-    //         Id = interaction.Id,
-    //         UserName = interaction.User,
-    //         InteractionType = interaction.InteractionType.1 ?? "Sin tipo de interacción",
-
-    //     })
-    //     .Cast<object>()
-    //     .ToList();
-    // }
+    public object GetInteractions()
+    {
+        if (this.Interactions == null)
+        {
+            return new List<object>();
+        }
+        return this.Interactions.Select(interaction => new
+        {
+            Id = interaction.Id,
+            UserName = interaction.User,
+            InteractionType = interaction.InteractionType
+        })
+        .Cast<object>()
+        .ToList();
+    }
+    
     public int GetCountLike()
     {
         if (this.Interactions == null) return 0;

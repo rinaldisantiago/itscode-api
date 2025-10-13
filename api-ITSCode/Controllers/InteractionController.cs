@@ -88,7 +88,32 @@ namespace apiUser.Controllers
             };
             return Ok(response);
         }
-        
+
+        // [HttpGet]
+        // public IActionResult GetUserInteraction([FromQuery] int postId, [FromQuery] int userId)
+        // {
+        //     var post = this.df.CreateDAOPost().GetPostById(postId);
+        //     if (post == null)
+        //         return NotFound(new { message = "Post no encontrado." });
+
+        //     var interaction = post.Interactions.FirstOrDefault(i => i.User.Id == userId);
+
+        //     if (interaction == null)
+        //     {
+        //         return Ok(new UserInteractionResponseDTO
+        //         {
+        //             InteractionId = null,
+        //             Type = null
+        //         });
+        //     }
+
+        //     return Ok(new UserInteractionResponseDTO
+        //     {
+        //         InteractionId = interaction.Id,
+        //         Type = (int)interaction.InteractionType
+        //     });
+        // }
+                
 
 
 

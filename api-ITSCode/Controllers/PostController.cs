@@ -86,16 +86,19 @@ namespace apiPost.Controllers
                 var postsAll = posts
                     .Select(post => new GetPostResponseDTO
                     {
+                        id = post.Id,
                         idUser = post.IdUser,
                         userName = post.UserName,
                         userAvatar = post.UserAvatar(),
                         title = post.Title,
                         content = post.Content,
                         commentsCount = post.GetCountComments(),
-                        likes = post.GetCountLike(),
-                        dislikes = post.GetCountDislike(),
+                        likesCount = post.GetCountLike(),
+                        dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
-                        comments = post.GetComments()
+                        comments = post.GetComments(),
+                        UserInteraction = GetUserInteraction(post, request.idUserLogger)
+
                     })
                     .ToList();
 
@@ -116,6 +119,28 @@ namespace apiPost.Controllers
 
                 });
             }
+        }
+
+
+        // Método auxiliar para obtener la interacción del usuario
+        private UserInteractionResponseDTO GetUserInteraction(Post post, int userId)
+        {
+            var userInteraction = post.Interactions.FirstOrDefault(i => i.User.Id == userId);
+            
+            if (userInteraction == null)
+            {
+                return new UserInteractionResponseDTO 
+                { 
+                    InteractionId = null, 
+                    Type = null 
+                };
+            }
+            
+            return new UserInteractionResponseDTO
+            {
+                InteractionId = userInteraction.Id,
+                Type = (int)userInteraction.InteractionType
+            };
         }
 
 
