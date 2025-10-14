@@ -154,28 +154,66 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("Sugerencias")]
         public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
+            var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
             List<User> sugerencias = this.df.CreateDAOUser()
-                .GetSugerencias(request.idUserLogger, request.page, request.pageSize);
+                .GetSugerencias(request.idUserLogger, request.page, request.pageSize, followingIds);
 
             // Mapear a DTO de respuesta
             GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
             {
                 Sugerencias = sugerencias.Select(u => new UserSuggestionDto
                 {
-                    UserName = u.UserName,
-                    Avatar = u.Avatar.Url
+                    id = u.Id,
+                    userName = u.UserName,
+                    avatar = u.Avatar.Url,
+                    isFollowing = followingIds.Contains(u.Id)
                 }).ToList()
             };
 
             return Ok(response);
         }
 
+        [HttpGet("{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
+        public IActionResult GetUsersBySearch([FromRoute] GetAllUsersRequestDTO request)
+        {
+            try
+            {
+                int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
+                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
 
-        
-    
+                var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
+
+                List<User> users = this.df.CreateDAOUser().SearchUsers(request.searchTerm, request.idUserLogger, request.pageNumber, request.pageSize);
+                var allUsers = users.Select(user => new GetUsersResponseDTO
+                {
+                    id = user.Id,
+                    userAvatar = user.GetAvatar(),
+                    userName = user.UserName,
+                    isFollowing = followingIds.Contains(user.Id)
+                })
+                .ToList();
+
+                var response = new GetAllUsersResponseDTO
+                {
+                    users = allUsers
+                };
+
+                return Ok(response);
+
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "An unexpected error occurred.",
+                    error = ex.Message
+                });
+            }
+        }
+
     }
 }

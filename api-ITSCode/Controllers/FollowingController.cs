@@ -5,7 +5,7 @@ using entity_library;
 namespace apiPost.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("Following")]
     public class FollowingController : ControllerBase
     {
         private readonly ILogger<FollowingController> _logger;
@@ -38,9 +38,9 @@ namespace apiPost.Controllers
 
             FollowResponseDTO response = new FollowResponseDTO
             {
-                Message = "Followed successfully",
-                UserFollowing = userFollowing.UserName,
-                UserFollowed = userFollowed.UserName
+                message = "Followed successfully",
+                userFollowing = userFollowing.UserName,
+                userFollowed = userFollowed.UserName
             };
 
             return Ok(new { response });

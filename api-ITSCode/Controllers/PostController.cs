@@ -87,6 +87,7 @@ namespace apiPost.Controllers
                 var postsAll = posts
                     .Select(post =>
                     {
+<<<<<<< HEAD
                         // **1. BUSCAR INTERACCIÓN DEL USUARIO LOGUEADO**
                         // Asumimos que request.idUserLogger tiene el ID del usuario actual.
                         Interaction? userCurrentInteraction = this.df.CreateDAOInteraction()
@@ -119,6 +120,21 @@ namespace apiPost.Controllers
                             } : null
                         };
                         return postDTO;
+=======
+                        id = post.Id,
+                        idUser = post.IdUser,
+                        userName = post.UserName,
+                        userAvatar = post.UserAvatar(),
+                        title = post.Title,
+                        content = post.Content,
+                        commentsCount = post.GetCountComments(),
+                        likesCount = post.GetCountLike(),
+                        dislikesCount = post.GetCountDislike(),
+                        fileUrl = post.GetUrlImage() ?? "",
+                        comments = post.GetComments(),
+                        UserInteraction = GetUserInteraction(post, request.idUserLogger)
+
+>>>>>>> 36de3654731949cc15c25c596bdaa8d0ed742172
                     })
                     .ToList();
 
@@ -138,6 +154,28 @@ namespace apiPost.Controllers
                     error = ex.Message,
                 });
             }
+        }
+
+
+        // Método auxiliar para obtener la interacción del usuario
+        private UserInteractionResponseDTO GetUserInteraction(Post post, int userId)
+        {
+            var userInteraction = post.Interactions.FirstOrDefault(i => i.User.Id == userId);
+            
+            if (userInteraction == null)
+            {
+                return new UserInteractionResponseDTO 
+                { 
+                    InteractionId = null, 
+                    Type = null 
+                };
+            }
+            
+            return new UserInteractionResponseDTO
+            {
+                InteractionId = userInteraction.Id,
+                Type = (int)userInteraction.InteractionType
+            };
         }
 
 

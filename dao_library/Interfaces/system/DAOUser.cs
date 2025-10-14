@@ -10,6 +10,8 @@ public interface DAOUser
     User? GetUserByEmail(string email);
     // User GetUserByUsernameAndPassword(string userName, string password);
     User Login(string userName, string password);
-    List<User> GetSugerencias(int idUserLogger, int page, int pageSize);
+    List<User> GetSugerencias(int idUserLogger, int page, int pageSize, List<int> followingIds);
+    List<User> SearchUsers(string searchTerm, int idUserLogger, int pageNumber, int pageSize);
 }
+    
 
