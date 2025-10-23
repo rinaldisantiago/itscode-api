@@ -82,45 +82,10 @@ namespace apiPost.Controllers
                     pageNumber,
                     pageSize
                 );
-
-                // 🔑 PUNTO CRÍTICO: Mapeo de Posts y la Interacción
+                
                 var postsAll = posts
-                    .Select(post =>
+                    .Select(post => new GetPostResponseDTO
                     {
-<<<<<<< HEAD
-                        // **1. BUSCAR INTERACCIÓN DEL USUARIO LOGUEADO**
-                        // Asumimos que request.idUserLogger tiene el ID del usuario actual.
-                        Interaction? userCurrentInteraction = this.df.CreateDAOInteraction()
-                            .GetInteractionByPostAndUser(post.Id, request.idUserLogger);
-
-                        // **2. CREAR EL DTO DE RESPUESTA**
-                        var postDTO = new GetPostResponseDTO
-                        {
-                            // 🛑 SOLUCIÓN AL NaN: Aseguramos que el ID del Post se incluya en la respuesta.
-                            // Esto corresponde a 'post.idPost' que usa tu frontend.
-                            idPost = post.Id, // <-- Usamos la propiedad 'Id' de la entidad Post
-
-                            // Propiedades existentes
-                            idUser = post.IdUser,
-                            userName = post.UserName,
-                            userAvatar = post.UserAvatar(),
-                            title = post.Title,
-                            content = post.Content,
-                            commentsCount = post.GetCountComments(),
-                            likes = post.GetCountLike(),
-                            dislikes = post.GetCountDislike(),
-                            fileUrl = post.GetUrlImage() ?? "",
-                            comments = post.GetComments(),
-
-                            // **3. ASIGNAR EL ESTADO DE INTERACCIÓN (SOLUCIÓN AL 400)**
-                            userInteraction = userCurrentInteraction != null ? new UserInteractionDTO
-                            {
-                                interactionId = userCurrentInteraction.Id,
-                                interactionType = (int)userCurrentInteraction.InteractionType
-                            } : null
-                        };
-                        return postDTO;
-=======
                         id = post.Id,
                         idUser = post.IdUser,
                         userName = post.UserName,
@@ -134,7 +99,6 @@ namespace apiPost.Controllers
                         comments = post.GetComments(),
                         UserInteraction = GetUserInteraction(post, request.idUserLogger)
 
->>>>>>> 36de3654731949cc15c25c596bdaa8d0ed742172
                     })
                     .ToList();
 

@@ -27,7 +27,12 @@ namespace apiUser.Controllers
                 Url = request.URLAvatar
             };
 
-            Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? 0);
+            Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? (int)RoleEnum.User);
+
+            if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
+            {
+                role = df.CreateDAORole().GetRoleById((int)RoleEnum.User);
+            }
 
             User user = new User
             {

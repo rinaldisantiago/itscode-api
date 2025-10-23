@@ -18,15 +18,7 @@ public class GetPostResponseDTO
     public string userName { get; set; } = "";
     public string userAvatar { get; set; } = "";
 
-<<<<<<< HEAD
-    public int idPost { get; set; }
-
-    public UserInteractionDTO? userInteraction { get; set; } 
-
-    public List<object> comments { get; set; }
-=======
     public List<object> comments { get; set; } 
     public UserInteractionResponseDTO UserInteraction { get; set; }
->>>>>>> 36de3654731949cc15c25c596bdaa8d0ed742172
 
 }
