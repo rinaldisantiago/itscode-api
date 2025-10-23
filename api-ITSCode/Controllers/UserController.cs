@@ -163,8 +163,9 @@ namespace apiUser.Controllers
         public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
+            var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
             List<User> sugerencias = this.df.CreateDAOUser()
-                .GetSugerencias(request.idUserLogger, request.page, request.pageSize);
+                .GetSugerencias(request.idUserLogger, request.page, request.pageSize, followingIds);
 
             // Mapear a DTO de respuesta
             GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
@@ -173,7 +174,8 @@ namespace apiUser.Controllers
                 {
                     id = u.Id,
                     userName = u.UserName,
-                    avatar = u.Avatar.Url
+                    avatar = u.Avatar.Url,
+                    isFollowing = followingIds.Contains(u.Id)
                 }).ToList()
             };
 
@@ -188,12 +190,15 @@ namespace apiUser.Controllers
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
                 int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
 
+                var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
+
                 List<User> users = this.df.CreateDAOUser().SearchUsers(request.searchTerm, request.idUserLogger, request.pageNumber, request.pageSize);
                 var allUsers = users.Select(user => new GetUsersResponseDTO
                 {
                     id = user.Id,
                     userAvatar = user.GetAvatar(),
-                    userName = user.UserName
+                    userName = user.UserName,
+                    isFollowing = followingIds.Contains(user.Id)
                 })
                 .ToList();
 
