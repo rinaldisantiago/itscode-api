@@ -14,5 +14,6 @@ public class AppDbContext : DbContext
     public DbSet<Following> Followings { get; set; }
     public DbSet<File> Files { get; set; }
     public DbSet<Image> Images { get; set; }
+    public DbSet<Ban> Bans { get; set; }
 
 }

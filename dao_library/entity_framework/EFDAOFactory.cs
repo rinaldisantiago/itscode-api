@@ -44,4 +44,9 @@ public class EFDAOFactory : DAOFactory
     {
         return new EFDAOInteraction(this.appDbContext);
     }
+
+    public DAOBan CreateDAOBan()
+    {
+        return new EFDAOBan(this.appDbContext);
+    }
 }
