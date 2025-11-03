@@ -3,7 +3,7 @@ using dao_library;
 using entity_library;
 
 
-namespace apiUser.Controllers
+namespace apiInteraction.Controllers
 {
     [ApiController]
     [Route("Interaction")]
