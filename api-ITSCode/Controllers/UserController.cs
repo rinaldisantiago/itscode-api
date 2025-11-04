@@ -120,7 +120,7 @@ namespace apiUser.Controllers
 
 
         [HttpGet("{userName}/{password}")]
-        public IActionResult Login([FromQuery] LoginRequestDTO request)
+        public IActionResult Login([FromRoute] LoginRequestDTO request)
         {
             try
             {
@@ -136,6 +136,18 @@ namespace apiUser.Controllers
                 if (user == null)
                 {
                     return Unauthorized(new { message = "Invalid username or password." });
+                }
+
+                if (user.IsBanned)
+                {
+                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user.Id);
+                  
+                    return Unauthorized(new
+                    {
+                        message = "Usuario Baneado.",
+                        reason = ban.Reason,
+                    });
+
                 }
 
                 LoginResponseDTO response = new LoginResponseDTO

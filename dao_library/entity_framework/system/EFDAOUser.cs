@@ -37,7 +37,9 @@ public class EFDAOUser : DAOUser
 
     public User UpdateUser(User user)
     {
-        throw new NotImplementedException();
+        this.dbContext.Users.Update(user);
+        dbContext.SaveChanges();
+        return user;
     }
 
     public List<User> GetSugerencias(int idUserLogger, int page, int pageSize, List<int> followingIds)

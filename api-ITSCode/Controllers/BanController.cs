@@ -21,7 +21,7 @@ namespace apiBan.Controllers
 
 
         [HttpGet("{id}")]
-        public IActionResult getBan([FromQuery] GetBanRequestDTO request)
+        public IActionResult getBan([FromRoute] GetBanRequestDTO request)
         {
             Ban ban = this.df.CreateDAOBan().GetBanById(request.id);
             if (ban == null) return null;
@@ -30,8 +30,8 @@ namespace apiBan.Controllers
             {
                 userId = ban.User.Id,
                 reason = ban.Reason,
-                banDate = ban.BanDate.ToString("yyyy-MM-dd"),
-                unbanDate = ban.UnbanDate?.ToString("yyyy-MM-dd") ?? ""
+                banDate = ban.BanDate.ToString("dd/MM/yyyy"),
+                unbanDate = ban.UnbanDate?.ToString("dd/MM/yyyy") ?? ""
             };
 
             return Ok(response);
@@ -42,6 +42,9 @@ namespace apiBan.Controllers
         {
             User user = this.df.CreateDAOUser().GetUser(request.userId);
             if (user == null) return NotFound();
+
+            user.IsBanned = true;
+            this.df.CreateDAOUser().UpdateUser(user);
 
             Ban ban = new Ban
             {
@@ -70,6 +73,10 @@ namespace apiBan.Controllers
             {
                 return NotFound(new { message = "Ban not found" });
             }
+
+            User user = ban.User;
+            user.IsBanned = false;
+            this.df.CreateDAOUser().UpdateUser(user);
 
             this.df.CreateDAOBan().DeleteBan(request.id);
             DeleteBanResponseDTO response = new DeleteBanResponseDTO

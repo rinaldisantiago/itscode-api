@@ -7,11 +7,13 @@ public class User : Person
     private string password = "";
     private Role? role;
     private Image? avatar;
+    private bool isBanned = false;
 
 
 
     public string UserName { get { return this.userName; } set { this.userName = value; } }
     public string Email { get { return this.email; } set { this.email = value; } }
+    public bool IsBanned { get { return this.isBanned; } set { this.isBanned = value; } }
     public string Password { get { return this.password; } set { this.password = value; } }
     public virtual Role? Role { get { return this.role; } set { this.role = value; } }
     public virtual Image? Avatar { get { return this.avatar; } set { this.avatar = value; } }

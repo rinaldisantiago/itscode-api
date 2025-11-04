@@ -39,4 +39,9 @@ public class EFDAOBan : DAOBan
     {
         throw new NotImplementedException();
     }
+
+    public Ban? GetBanByUserId(int userId)
+    {
+        return this.dbContext.Bans.FirstOrDefault(ban => ban.User.Id == userId);
+    }
 }

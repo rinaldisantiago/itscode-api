@@ -8,6 +8,7 @@ public interface DAOBan
     List<Ban> GetBans(int pageNumber, int pageSize);
     void UpdateBan(Ban ban);
     void DeleteBan(int idBan);
+    Ban? GetBanByUserId(int userId);
 
     
 }
