@@ -20,20 +20,46 @@ namespace apiUser.Controllers
 
 
         [HttpPost]
-        public IActionResult CreateUser([FromBody] PostUserRequestDTO request)
+// 🚨 CAMBIO CLAVE: Usamos [FromForm] para leer FormData (campos de texto + archivo)
+        public IActionResult CreateUser([FromForm] PostUserRequestDTO request)
         {
+            // 1. INICIALIZACIÓN: Definir la URL del avatar
+            string avatarUrl;
+
+            if (request.Image != null)
+            {
+                // 🚨 LÓGICA DE SUBIDA DE ARCHIVO (Delegar la responsabilidad)
+                
+                // Esta es la parte que tienes que implementar usando tu capa DAO/Service.
+                // Aquí se llamaría a un servicio: var uploadedResult = _fileService.Upload(request.Image);
+                
+                // POR AHORA, para probar el flujo completo: simulamos el guardado
+                // y le asignamos una URL (EJEMPLO, DEBES REEMPLAZAR ESTO)
+                avatarUrl = $"http://localhost:5052/avatars/{request.Username}_{DateTime.Now.Ticks}.jpg";
+                
+                // Si necesitas guardar el archivo físicamente, el código iría aquí o en un servicio.
+            }
+            else
+            {
+                // Si no hay archivo, usamos la URL por defecto o la que venga en el DTO
+                avatarUrl = request.URLAvatar ?? "https://example.com/default.jpg";
+            }
+
+            // 2. CREACIÓN DEL OBJETO AVATAR CON LA URL DEFINIDA
             Image avatar = new Image
             {
-                Url = request.URLAvatar
+                Url = avatarUrl 
             };
 
+            // 3. Lógica de Rol (SIN CAMBIOS)
             Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? (int)RoleEnum.User);
 
             if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
             {
                 role = df.CreateDAORole().GetRoleById((int)RoleEnum.User);
             }
-
+            
+            // 4. CREACIÓN DEL USUARIO (SIN CAMBIOS, usa los datos del 'request')
             User user = new User
             {
                 FullName = request.FullName,
@@ -41,13 +67,12 @@ namespace apiUser.Controllers
                 Email = request.Email,
                 Password = request.Password,
                 Role = role,
-                Avatar = avatar
+                Avatar = avatar // Usamos el objeto Avatar con la URL
             };
 
             user.SetPassword(user.Password);
 
             this.df.CreateDAOUser().CreateUser(user);
-
 
             PostUserResponseDTO response = new PostUserResponseDTO
             {
@@ -119,8 +144,8 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpGet("{userName}/{password}")]
-        public IActionResult Login([FromQuery] LoginRequestDTO request)
+        [HttpPost("Login")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
+        public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
         {
             try
             {
@@ -128,6 +153,8 @@ namespace apiUser.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+
+                // Aquí el request.userName y request.password vienen del cuerpo (body) de la solicitud HTTP
 
                 string encryptedPassword = new User().encript(request.password);
 
