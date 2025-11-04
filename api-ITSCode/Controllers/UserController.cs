@@ -144,8 +144,13 @@ namespace apiUser.Controllers
         }
 
 
+<<<<<<< HEAD
         [HttpPost("Login")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
         public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
+=======
+        [HttpGet("{userName}/{password}")]
+        public IActionResult Login([FromRoute] LoginRequestDTO request)
+>>>>>>> 0ee41571f2c621832d3680dc3bb93858f3eaafaa
         {
             try
             {
@@ -163,6 +168,18 @@ namespace apiUser.Controllers
                 if (user == null)
                 {
                     return Unauthorized(new { message = "Invalid username or password." });
+                }
+
+                if (user.IsBanned)
+                {
+                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user.Id);
+                  
+                    return Unauthorized(new
+                    {
+                        message = "Usuario Baneado.",
+                        reason = ban.Reason,
+                    });
+
                 }
 
                 LoginResponseDTO response = new LoginResponseDTO

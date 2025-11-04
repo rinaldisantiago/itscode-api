@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
 
-namespace apiPost.Controllers
+namespace apiFollowing.Controllers
 {
     [ApiController]
     [Route("Following")]
