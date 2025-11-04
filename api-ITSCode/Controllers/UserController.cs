@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
-
+// CAMBIO CLAVE: Añadir estos usings para manejo de archivos y rutas
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace apiUser.Controllers
 {
@@ -11,55 +14,64 @@ namespace apiUser.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private DAOFactory df;
+        // CAMBIO CLAVE: Añadir un campo para el entorno web
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public UserController(ILogger<UserController> logger, DAOFactory df)
+        // CAMBIO CLAVE: Inyectar IWebHostEnvironment en el constructor
+        public UserController(ILogger<UserController> logger, DAOFactory df, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
             this.df = df;
+            _hostEnvironment = hostEnvironment; // Guardar la instancia
         }
 
-
         [HttpPost]
-// 🚨 CAMBIO CLAVE: Usamos [FromForm] para leer FormData (campos de texto + archivo)
-        public IActionResult CreateUser([FromForm] PostUserRequestDTO request)
+        // CAMBIO CLAVE: Hacer el método asíncrono
+        public async Task<IActionResult> CreateUser([FromForm] PostUserRequestDTO request)
         {
-            // 1. INICIALIZACIÓN: Definir la URL del avatar
             string avatarUrl;
 
-            if (request.Image != null)
+            // CAMBIO CLAVE: LÓGICA REAL PARA GUARDAR EL ARCHIVO
+            if (request.Image != null && request.Image.Length > 0)
             {
-                // 🚨 LÓGICA DE SUBIDA DE ARCHIVO (Delegar la responsabilidad)
-                
-                // Esta es la parte que tienes que implementar usando tu capa DAO/Service.
-                // Aquí se llamaría a un servicio: var uploadedResult = _fileService.Upload(request.Image);
-                
-                // POR AHORA, para probar el flujo completo: simulamos el guardado
-                // y le asignamos una URL (EJEMPLO, DEBES REEMPLAZAR ESTO)
-                avatarUrl = $"http://localhost:5052/avatars/{request.Username}_{DateTime.Now.Ticks}.jpg";
-                
-                // Si necesitas guardar el archivo físicamente, el código iría aquí o en un servicio.
+                // 1. Definir la carpeta de destino (dentro de wwwroot para acceso público)
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+
+                // 2. Crear un nombre de archivo único para evitar sobreescrituras
+                string uniqueFileName = $"{request.Username}_{Guid.NewGuid().ToString()}{Path.GetExtension(request.Image.FileName)}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                // 3. Guardar el archivo en el disco de forma asíncrona
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.Image.CopyToAsync(fileStream);
+                }
+
+                // 4. Generar la URL pública relativa que se guardará en la base de datos
+                avatarUrl = $"/avatars/{uniqueFileName}";
             }
             else
             {
-                // Si no hay archivo, usamos la URL por defecto o la que venga en el DTO
-                avatarUrl = request.URLAvatar ?? "https://example.com/default.jpg";
+                // Si no se sube imagen, usamos una por defecto
+                avatarUrl = "/avatars/default.png"; // Asegúrate de tener una imagen default.png en wwwroot/avatars
             }
 
-            // 2. CREACIÓN DEL OBJETO AVATAR CON LA URL DEFINIDA
+            // --- El resto de tu lógica de creación de usuario permanece igual ---
             Image avatar = new Image
             {
-                Url = avatarUrl 
+                Url = avatarUrl
             };
 
-            // 3. Lógica de Rol (SIN CAMBIOS)
             Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? (int)RoleEnum.User);
-
             if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
             {
                 role = df.CreateDAORole().GetRoleById((int)RoleEnum.User);
             }
-            
-            // 4. CREACIÓN DEL USUARIO (SIN CAMBIOS, usa los datos del 'request')
+
             User user = new User
             {
                 FullName = request.FullName,
@@ -67,11 +79,10 @@ namespace apiUser.Controllers
                 Email = request.Email,
                 Password = request.Password,
                 Role = role,
-                Avatar = avatar // Usamos el objeto Avatar con la URL
+                Avatar = avatar
             };
 
             user.SetPassword(user.Password);
-
             this.df.CreateDAOUser().CreateUser(user);
 
             PostUserResponseDTO response = new PostUserResponseDTO
@@ -80,7 +91,6 @@ namespace apiUser.Controllers
             };
             return Ok(response);
         }
-
 
         [HttpGet("{id}")]
         public IActionResult getUser([FromQuery] GetUserRequestDTO request)
