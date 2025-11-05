@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
+using Microsoft.AspNetCore.Hosting; 
 
 namespace apiPost.Controllers
 {
@@ -10,11 +11,13 @@ namespace apiPost.Controllers
     {
         private readonly ILogger<PostController> _logger;
         private DAOFactory df;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public PostController(ILogger<PostController> logger, DAOFactory df)
+        public PostController(ILogger<PostController> logger, DAOFactory df, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
             this.df = df;
+            _hostEnvironment = hostEnvironment;
         }
 
 
@@ -144,20 +147,43 @@ namespace apiPost.Controllers
 
 
         [HttpPost]
-        public IActionResult PostCreate([FromQuery] PostPostRequestDTO request)
+        [Consumes("multipart/form-data")]
+        public IActionResult PostCreate([FromForm] PostPostRequestDTO request)
         {
-            File file = new File
+            string finalFileUrl = null;
+
+            // AHORA ESTA LÓGICA FUNCIONARÁ
+            if (request.File != null && request.File.Length > 0)
             {
-                Url = request.fileUrl
-            };
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "posts_files");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.File.FileName;
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    request.File.CopyTo(fileStream);
+                }
+                
+                finalFileUrl = $"/posts_files/{uniqueFileName}";
+            }
+            else if (!string.IsNullOrEmpty(request.fileUrl))
+            {
+                finalFileUrl = request.fileUrl;
+            }
+
+            File fileEntity = new File { Url = finalFileUrl };
 
             Post newPost = new Post
             {
                 Title = request.title,
                 Content = request.content,
                 User = this.df.CreateDAOUser().GetUser(request.idUser),
-                File = file,
-                CreatedAt = DateTime.Now
+                File = fileEntity,
+                CreatedAt = DateTime.UtcNow
             };
 
             this.df.CreateDAOPost().CreatePost(newPost);
@@ -168,7 +194,7 @@ namespace apiPost.Controllers
                 idUser = newPost.User.Id
             };
 
-            return Ok(response);
+            return StatusCode(201, response);
         }
 
 

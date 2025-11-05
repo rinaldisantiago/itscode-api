@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Http; // Necesario para IFormFile
+using Microsoft.AspNetCore.Http; 
 
 public class PostUserRequestDTO
 {
