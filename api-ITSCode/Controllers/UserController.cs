@@ -93,10 +93,13 @@ namespace apiUser.Controllers
         }
 
         [HttpGet("{id}")]
-        public IActionResult getUser([FromQuery] GetUserRequestDTO request)
+        public IActionResult getUser(int id) // <-- ¡Solucionado! Ahora toma el 'id' de la URL
         {
-            User user = this.df.CreateDAOUser().GetUser(request.Id);
-            if (user == null) return null;
+            User user = this.df.CreateDAOUser().GetUser(id); // Usamos el 'id' directamente
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {id} not found." });
+            }
 
             GetUserResponseDTO response = new GetUserResponseDTO
             {

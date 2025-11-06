@@ -8,6 +8,5 @@ public class PostUserRequestDTO
     public string Password { get; set; }
     public int? RoleId { get; set; }
     public string? URLAvatar { get; set; } = "";
-   
     public IFormFile? Image { get; set; } 
 }
