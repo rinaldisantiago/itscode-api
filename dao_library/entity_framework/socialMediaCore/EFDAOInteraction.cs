@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 public class EFDAOInteraction : DAOInteraction
 {
     private AppDbContext appDbContext;
@@ -9,6 +11,7 @@ public class EFDAOInteraction : DAOInteraction
     {
         var createdInteraction = this.appDbContext.Interactions.Add(interaction);
         this.appDbContext.SaveChanges();
+        this.appDbContext.Entry(interaction).State = EntityState.Detached;
         return createdInteraction.Entity;
     }
     public Interaction? GetInteractionById(int id)
@@ -25,6 +28,18 @@ public class EFDAOInteraction : DAOInteraction
             this.appDbContext.SaveChanges();
         }
     }
+    public Interaction? GetInteractionByPostAndUser(int postId, int userId)
+    {
 
-    
+        // return this.appDbContext.Interactions
+        //     .FirstOrDefault(i => i.PostId == postId && i.UserId == userId);
+
+        return this.appDbContext.Interactions
+        .AsNoTracking()
+        .Include(i => i.Post) // <-- Necesario para acceder a i.Post.Id
+        .Include(i => i.User) // <-- Necesario para acceder a i.User.Id
+        .FirstOrDefault(i => i.Post.Id == postId && i.User.Id == userId);
+    }
+
+
 }

@@ -36,38 +36,37 @@ namespace apiInteraction.Controllers
                 return BadRequest(new { message = "Tipo de interacción inválido." });
             }
 
-            // Buscar si ya existe una interacción de este usuario con este post
-            var existingInteractions = post.Interactions
-                .Where(i => i.User.Id == user.Id)
-                .ToList();
+            Interaction? existingInteraction = this.df.CreateDAOInteraction()
+            .GetInteractionByPostAndUser(request.postId, request.userId); 
 
-            if (existingInteractions.Any())
+            if (existingInteraction != null)
             {
-                var existing = existingInteractions.First();
-                if ((int)existing.InteractionType == request.interactionType)
+                // ... (Tu lógica existente para 400 Bad Request y DELETE) ...
+                if ((int)existingInteraction.InteractionType == request.interactionType)
                 {
-                    return BadRequest(new { message = "Ya existe esta interacción para este usuario y post." });
+                    return BadRequest(new { message = "Ya existe esta interacción. El frontend debe llamar a DELETE para anularla." }); 
                 }
                 else
                 {
-                    // Eliminar la interacción previa
-                    this.df.CreateDAOInteraction().DeleteInteraction(existing.Id);
+                    this.df.CreateDAOInteraction().DeleteInteraction(existingInteraction.Id);
                 }
             }
 
             Interaction interaction = new Interaction
             {
-                Post = post,
-                User = user,
+                PostId = request.postId, // <--- Usar el ID
+                UserId = request.userId,   // <--- Usar el ID
                 InteractionType = (InteractionType)request.interactionType
             };
 
             this.df.CreateDAOInteraction().CreateInteraction(interaction);
 
+            int newInteractionId = interaction.Id;
+
             PostInteractionResponseDTO response = new PostInteractionResponseDTO
             {
                 message = "Interaction created successfully",
-                interactionId = interaction.Id
+                interactionId = newInteractionId
             };
             return Ok(response);
         }

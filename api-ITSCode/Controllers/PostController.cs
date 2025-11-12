@@ -29,7 +29,7 @@ namespace apiPost.Controllers
                 }
                 
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
-                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize; //TODO: ver si es necesario la condicional
+                int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
 
                 List<Post> posts;
 
@@ -40,7 +40,7 @@ namespace apiPost.Controllers
                     pageNumber,
                     pageSize
                 );
-
+                
                 var postsAll = posts
                     .Select(post => new GetPostResponseDTO
                     {
@@ -55,26 +55,25 @@ namespace apiPost.Controllers
                         dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
                         comments = post.GetComments(),
-                        UserInteraction = GetUserInteraction(post, request.idUserLogger)
+                        userInteraction = GetUserInteraction(post, request.idUserLogger)
 
                     })
                     .ToList();
 
                 var response = new GetAllPostResponseDTO
                 {
-                    Posts = postsAll
+                    posts = postsAll
                 };
 
                 return Ok(response);
             }
             catch (Exception ex)
             {
-
+                // ... (Manejo de errores) ...
                 return StatusCode(500, new
                 {
                     message = "An unexpected error occurred.",
                     error = ex.Message,
-
                 });
             }
         }
@@ -89,15 +88,15 @@ namespace apiPost.Controllers
             {
                 return new UserInteractionResponseDTO 
                 { 
-                    InteractionId = null, 
-                    Type = null 
+                    interactionId = null, 
+                    type = null 
                 };
             }
             
             return new UserInteractionResponseDTO
             {
-                InteractionId = userInteraction.Id,
-                Type = (int)userInteraction.InteractionType
+                interactionId = userInteraction.Id,
+                type = (int)userInteraction.InteractionType
             };
         }
 
@@ -130,7 +129,7 @@ namespace apiPost.Controllers
             PostPostResponseDTO response = new PostPostResponseDTO
             {
                 message = "Post created successfully",
-                IdUser = newPost.User.Id
+                idUser = newPost.User.Id
             };
 
             return Ok(response);
