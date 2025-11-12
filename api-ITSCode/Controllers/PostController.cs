@@ -18,58 +18,16 @@ namespace apiPost.Controllers
         }
 
 
-        // [HttpGet("{id}")]
-        // public IActionResult Post([FromQuery] GetPostByIdRequestDTO request)
-        // {
-        //     Post post = this.df.CreateDAOPost().GetPostById(request.id);
-        //     if (post == null) return null;
-
-        //     GetPostByIdResponseDTO response = new GetPostByIdResponseDTO
-        //     {
-        //         post = post
-        //     };
-
-        //     return Ok(response);
-        // }
-
-
-        // [HttpGet("getAll")]
-        // public IActionResult getAll([FromQuery] GetAllPostRequestDTO request)
-        // {
-        //     List<Post> allPosts = this.df.CreateDAOPost().getAll();
-        //     List<GetPostResponseDTO> posts = new List<GetPostResponseDTO>();
-
-        //     foreach (Post post in allPosts)
-        //     {
-        //         GetPostResponseDTO getPost = new GetPostResponseDTO
-        //         {
-        //             title = post.Title,
-        //             content = post.Content,
-        //             userName = post.UserName,
-        //             userAvatar = post.userAvatar,
-        //             commentsCount = post.GetCountComments(),
-        //             likes = post.GetCountLike(),
-        //             dislikes = post.GetCountDislike(),
-        //             fileUrl = post.GetUrlImage() ?? "",
-        //             comments = post.GetComments()
-        //         };
-
-        //         posts.Add(getPost);
-        //     }
-
-        //     GetAllPostResponseDTO response = new GetAllPostResponseDTO
-        //     {
-        //         Posts = posts
-        //     };
-
-        //     return Ok (response);
-        // }
-
         [HttpGet]
         public IActionResult GetPosts([FromQuery] GetAllPostRequestDTO request)
         {
             try
             {
+                if (this.df.CreateDAOUser().GetUser(request.idUserLogger) == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+                
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
                 int pageSize = request.pageSize <= 0 ? 1 : request.pageSize; //TODO: ver si es necesario la condicional
 
@@ -115,7 +73,7 @@ namespace apiPost.Controllers
                 return StatusCode(500, new
                 {
                     message = "An unexpected error occurred.",
-                    error = ex.Message,// Esto mostrará el mensaje del error
+                    error = ex.Message,
 
                 });
             }
@@ -147,6 +105,12 @@ namespace apiPost.Controllers
         [HttpPost]
         public IActionResult PostCreate([FromQuery] PostPostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             File file = new File
             {
                 Url = request.fileUrl
@@ -156,7 +120,7 @@ namespace apiPost.Controllers
             {
                 Title = request.title,
                 Content = request.content,
-                User = this.df.CreateDAOUser().GetUser(request.idUser),
+                User = user,
                 File = file,
                 CreatedAt = DateTime.Now
             };
@@ -176,8 +140,19 @@ namespace apiPost.Controllers
         [HttpDelete]
         public IActionResult DeletePost([FromQuery] DeletePostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
+
+            if (post.User.Id != user.Id)
+            {
+                return Forbid("User is not the author of the post.");
+            }
 
             this.df.CreateDAOPost().DeletePost(request.id);
             this.df.CreateDAOFile().DeleteFile(post.File.Id);
@@ -194,8 +169,19 @@ namespace apiPost.Controllers
         [HttpPut]
         public IActionResult UpdatePost([FromBody] UpdatePostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
+
+            if (post.User.Id != user.Id)
+            {
+                return Forbid("User is not the author of the post.");
+            }
 
             post.Title = request.title;
             post.Content = request.content;

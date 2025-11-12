@@ -140,7 +140,7 @@ namespace apiUser.Controllers
 
                 if (user.IsBanned)
                 {
-                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user.Id);
+                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user);
                   
                     return Unauthorized(new
                     {
