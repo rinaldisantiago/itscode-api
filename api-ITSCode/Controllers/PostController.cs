@@ -25,6 +25,11 @@ namespace apiPost.Controllers
         {
             try
             {
+                if (this.df.CreateDAOUser().GetUser(request.idUserLogger) == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+                
                 int pageNumber = request.pageNumber <= 0 ? 1 : request.pageNumber;
                 int pageSize = request.pageSize <= 0 ? 1 : request.pageSize;
 
@@ -52,14 +57,14 @@ namespace apiPost.Controllers
                         dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
                         comments = post.GetComments(),
-                        UserInteraction = GetUserInteraction(post, request.idUserLogger)
+                        userInteraction = GetUserInteraction(post, request.idUserLogger)
 
                     })
                     .ToList();
 
                 var response = new GetAllPostResponseDTO
                 {
-                    Posts = postsAll
+                    posts = postsAll
                 };
 
                 return Ok(response);
@@ -85,15 +90,15 @@ namespace apiPost.Controllers
             {
                 return new UserInteractionResponseDTO 
                 { 
-                    InteractionId = null, 
-                    Type = null 
+                    interactionId = null, 
+                    type = null 
                 };
             }
             
             return new UserInteractionResponseDTO
             {
-                InteractionId = userInteraction.Id,
-                Type = (int)userInteraction.InteractionType
+                interactionId = userInteraction.Id,
+                type = (int)userInteraction.InteractionType
             };
         }
 
@@ -102,6 +107,12 @@ namespace apiPost.Controllers
         [Consumes("multipart/form-data")]
         public IActionResult PostCreate([FromForm] PostPostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             string finalFileUrl = null;
 
             if (request.File != null && request.File.Length > 0)
@@ -152,8 +163,19 @@ namespace apiPost.Controllers
         [HttpDelete]
         public IActionResult DeletePost([FromQuery] DeletePostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
+
+            if (post.User.Id != user.Id)
+            {
+                return Forbid("User is not the author of the post.");
+            }
 
             this.df.CreateDAOPost().DeletePost(request.id);
             this.df.CreateDAOFile().DeleteFile(post.File.Id);
@@ -170,8 +192,19 @@ namespace apiPost.Controllers
         [HttpPut]
         public IActionResult UpdatePost([FromBody] UpdatePostRequestDTO request)
         {
+            var user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if (user == null)
+            {
+                return Unauthorized("Invalid user.");
+            }
+
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
+
+            if (post.User.Id != user.Id)
+            {
+                return Forbid("User is not the author of the post.");
+            }
 
             post.Title = request.title;
             post.Content = request.content;

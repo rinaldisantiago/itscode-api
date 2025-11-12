@@ -32,7 +32,7 @@ namespace apiUser.Controllers
             string avatarUrl;
 
             // CAMBIO CLAVE: LÓGICA REAL PARA GUARDAR EL ARCHIVO
-            if (request.Image != null && request.Image.Length > 0)
+            if (request.image != null && request.image.Length > 0)
             {
                 // 1. Definir la carpeta de destino (dentro de wwwroot para acceso público)
                 string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
@@ -42,13 +42,13 @@ namespace apiUser.Controllers
                 }
 
                 // 2. Crear un nombre de archivo único para evitar sobreescrituras
-                string uniqueFileName = $"{request.Username}_{Guid.NewGuid().ToString()}{Path.GetExtension(request.Image.FileName)}";
+                string uniqueFileName = $"{request.username}_{Guid.NewGuid().ToString()}{Path.GetExtension(request.image.FileName)}";
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
                 // 3. Guardar el archivo en el disco de forma asíncrona
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
-                    await request.Image.CopyToAsync(fileStream);
+                    await request.image.CopyToAsync(fileStream);
                 }
 
                 // 4. Generar la URL pública relativa que se guardará en la base de datos
@@ -66,7 +66,7 @@ namespace apiUser.Controllers
                 Url = avatarUrl
             };
 
-            Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? (int)RoleEnum.User);
+            Role? role = df.CreateDAORole().GetRoleById(request.roleId ?? (int)RoleEnum.User);
             if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
             {
                 role = df.CreateDAORole().GetRoleById((int)RoleEnum.User);
@@ -74,10 +74,10 @@ namespace apiUser.Controllers
 
             User user = new User
             {
-                FullName = request.FullName,
-                UserName = request.Username,
-                Email = request.Email,
-                Password = request.Password,
+                FullName = request.fullName,
+                UserName = request.username,
+                Email = request.email,
+                Password = request.password,
                 Role = role,
                 Avatar = avatar
             };
@@ -147,7 +147,7 @@ namespace apiUser.Controllers
 
             DeleteUserResponseDTO response = new DeleteUserResponseDTO
             {
-                Message = "User deleted successfully",
+                message = "User deleted successfully",
             };
 
 
@@ -180,7 +180,7 @@ namespace apiUser.Controllers
 
                 if (user.IsBanned)
                 {
-                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user.Id);
+                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user);
                   
                     return Unauthorized(new
                     {
@@ -192,11 +192,11 @@ namespace apiUser.Controllers
 
                 LoginResponseDTO response = new LoginResponseDTO
                 {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    UrlAvatar = user.GetAvatar()
+                    id = user.Id,
+                    fullName = user.FullName,
+                    userName = user.UserName,
+                    email = user.Email,
+                    urlAvatar = user.GetAvatar()
                 };
 
                 return Ok(new
@@ -222,7 +222,7 @@ namespace apiUser.Controllers
             // Mapear a DTO de respuesta
             GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
             {
-                Sugerencias = sugerencias.Select(u => new UserSuggestionDto
+                suggestions = sugerencias.Select(u => new UserSuggestionDto
                 {
                     id = u.Id,
                     userName = u.UserName,

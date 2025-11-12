@@ -19,6 +19,6 @@ public class GetPostResponseDTO
     public string userAvatar { get; set; } = "";
 
     public List<object> comments { get; set; } 
-    public UserInteractionResponseDTO UserInteraction { get; set; }
+    public UserInteractionResponseDTO userInteraction { get; set; }
 
 }

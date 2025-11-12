@@ -1,6 +1,6 @@
 public class GetSugerenciasResponseDTO
 {
-    public List<UserSuggestionDto> Sugerencias { get; set; }
+    public List<UserSuggestionDto> suggestions { get; set; }
 }
 
 

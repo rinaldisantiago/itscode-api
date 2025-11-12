@@ -1,9 +1,9 @@
 public class LoginResponseDTO
 {
-    public int Id { get; set; }
-    public string FullName { get; set; }
-    public string UserName { get; set; }
-    public string Email { get; set; }
-    public string UrlAvatar { get; set; }
+    public int id { get; set; }
+    public string fullName { get; set; }
+    public string userName { get; set; }
+    public string email { get; set; }
+    public string urlAvatar { get; set; }
 
 }
