@@ -157,7 +157,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost("Login")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
+        [HttpPost("Login")] 
         public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
         {
             try
@@ -235,7 +235,7 @@ namespace apiUser.Controllers
         }
 
         [HttpGet("{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
-        public IActionResult GetUsersBySearch([FromRoute] GetAllUsersRequestDTO request)
+        public IActionResult GetUsersBySearch([FromRoute] SearchUsersRequestDTO request)
         {
             try
             {
@@ -245,16 +245,16 @@ namespace apiUser.Controllers
                 var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
 
                 List<User> users = this.df.CreateDAOUser().SearchUsers(request.searchTerm, request.idUserLogger, request.pageNumber, request.pageSize);
-                var allUsers = users.Select(user => new GetUsersResponseDTO
+                var allUsers = users.Select(user => new UserSuggestionDto
                 {
                     id = user.Id,
-                    userAvatar = user.GetAvatar(),
+                    avatar = user.GetAvatar(),
                     userName = user.UserName,
                     isFollowing = followingIds.Contains(user.Id)
                 })
                 .ToList();
 
-                var response = new GetAllUsersResponseDTO
+                var response = new SearchUsersResponseDTO
                 {
                     users = allUsers
                 };

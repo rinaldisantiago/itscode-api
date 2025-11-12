@@ -20,54 +20,6 @@ namespace apiPost.Controllers
             _hostEnvironment = hostEnvironment;
         }
 
-
-        // [HttpGet("{id}")]
-        // public IActionResult Post([FromQuery] GetPostByIdRequestDTO request)
-        // {
-        //     Post post = this.df.CreateDAOPost().GetPostById(request.id);
-        //     if (post == null) return null;
-
-        //     GetPostByIdResponseDTO response = new GetPostByIdResponseDTO
-        //     {
-        //         post = post
-        //     };
-
-        //     return Ok(response);
-        // }
-
-
-        // [HttpGet("getAll")]
-        // public IActionResult getAll([FromQuery] GetAllPostRequestDTO request)
-        // {
-        //     List<Post> allPosts = this.df.CreateDAOPost().getAll();
-        //     List<GetPostResponseDTO> posts = new List<GetPostResponseDTO>();
-
-        //     foreach (Post post in allPosts)
-        //     {
-        //         GetPostResponseDTO getPost = new GetPostResponseDTO
-        //         {
-        //             title = post.Title,
-        //             content = post.Content,
-        //             userName = post.UserName,
-        //             userAvatar = post.userAvatar,
-        //             commentsCount = post.GetCountComments(),
-        //             likes = post.GetCountLike(),
-        //             dislikes = post.GetCountDislike(),
-        //             fileUrl = post.GetUrlImage() ?? "",
-        //             comments = post.GetComments()
-        //         };
-
-        //         posts.Add(getPost);
-        //     }
-
-        //     GetAllPostResponseDTO response = new GetAllPostResponseDTO
-        //     {
-        //         Posts = posts
-        //     };
-
-        //     return Ok (response);
-        // }
-
         [HttpGet]
         public IActionResult GetPosts([FromQuery] GetAllPostRequestDTO request)
         {
@@ -152,7 +104,6 @@ namespace apiPost.Controllers
         {
             string finalFileUrl = null;
 
-            // AHORA ESTA LÓGICA FUNCIONARÁ
             if (request.File != null && request.File.Length > 0)
             {
                 string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "posts_files");
