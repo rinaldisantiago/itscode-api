@@ -26,7 +26,7 @@ namespace apiUser.Controllers
             // 1. INICIALIZACIÓN: Definir la URL del avatar
             string avatarUrl;
 
-            if (request.Image != null)
+            if (request.image != null)
             {
                 // 🚨 LÓGICA DE SUBIDA DE ARCHIVO (Delegar la responsabilidad)
                 
@@ -35,14 +35,14 @@ namespace apiUser.Controllers
                 
                 // POR AHORA, para probar el flujo completo: simulamos el guardado
                 // y le asignamos una URL (EJEMPLO, DEBES REEMPLAZAR ESTO)
-                avatarUrl = $"http://localhost:5052/avatars/{request.Username}_{DateTime.Now.Ticks}.jpg";
+                avatarUrl = $"http://localhost:5052/avatars/{request.username}_{DateTime.Now.Ticks}.jpg";
                 
                 // Si necesitas guardar el archivo físicamente, el código iría aquí o en un servicio.
             }
             else
             {
                 // Si no hay archivo, usamos la URL por defecto o la que venga en el DTO
-                avatarUrl = request.URLAvatar ?? "https://example.com/default.jpg";
+                avatarUrl = request.urlAvatar ?? "https://example.com/default.jpg";
             }
 
             // 2. CREACIÓN DEL OBJETO AVATAR CON LA URL DEFINIDA
@@ -52,7 +52,7 @@ namespace apiUser.Controllers
             };
 
             // 3. Lógica de Rol (SIN CAMBIOS)
-            Role? role = df.CreateDAORole().GetRoleById(request.RoleId ?? (int)RoleEnum.User);
+            Role? role = df.CreateDAORole().GetRoleById(request.roleId ?? (int)RoleEnum.User);
 
             if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
             {
@@ -62,10 +62,10 @@ namespace apiUser.Controllers
             // 4. CREACIÓN DEL USUARIO (SIN CAMBIOS, usa los datos del 'request')
             User user = new User
             {
-                FullName = request.FullName,
-                UserName = request.Username,
-                Email = request.Email,
-                Password = request.Password,
+                FullName = request.fullName,
+                UserName = request.username,
+                Email = request.email,
+                Password = request.password,
                 Role = role,
                 Avatar = avatar // Usamos el objeto Avatar con la URL
             };
@@ -85,7 +85,7 @@ namespace apiUser.Controllers
         [HttpGet("{id}")]
         public IActionResult getUser([FromQuery] GetUserRequestDTO request)
         {
-            User user = this.df.CreateDAOUser().GetUser(request.Id);
+            User user = this.df.CreateDAOUser().GetUser(request.id);
             if (user == null) return null;
 
             GetUserResponseDTO response = new GetUserResponseDTO
@@ -134,7 +134,7 @@ namespace apiUser.Controllers
 
             DeleteUserResponseDTO response = new DeleteUserResponseDTO
             {
-                Message = "User deleted successfully",
+                message = "User deleted successfully",
             };
 
 
@@ -179,11 +179,11 @@ namespace apiUser.Controllers
 
                 LoginResponseDTO response = new LoginResponseDTO
                 {
-                    Id = user.Id,
-                    FullName = user.FullName,
-                    UserName = user.UserName,
-                    Email = user.Email,
-                    UrlAvatar = user.GetAvatar()
+                    id = user.Id,
+                    fullName = user.FullName,
+                    userName = user.UserName,
+                    email = user.Email,
+                    urlAvatar = user.GetAvatar()
                 };
 
                 return Ok(new
@@ -209,7 +209,7 @@ namespace apiUser.Controllers
             // Mapear a DTO de respuesta
             GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
             {
-                Sugerencias = sugerencias.Select(u => new UserSuggestionDto
+                suggestions = sugerencias.Select(u => new UserSuggestionDto
                 {
                     id = u.Id,
                     userName = u.UserName,

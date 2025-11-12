@@ -97,14 +97,14 @@ namespace apiPost.Controllers
                         dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
                         comments = post.GetComments(),
-                        UserInteraction = GetUserInteraction(post, request.idUserLogger)
+                        userInteraction = GetUserInteraction(post, request.idUserLogger)
 
                     })
                     .ToList();
 
                 var response = new GetAllPostResponseDTO
                 {
-                    Posts = postsAll
+                    posts = postsAll
                 };
 
                 return Ok(response);
@@ -130,15 +130,15 @@ namespace apiPost.Controllers
             {
                 return new UserInteractionResponseDTO 
                 { 
-                    InteractionId = null, 
-                    Type = null 
+                    interactionId = null, 
+                    type = null 
                 };
             }
             
             return new UserInteractionResponseDTO
             {
-                InteractionId = userInteraction.Id,
-                Type = (int)userInteraction.InteractionType
+                interactionId = userInteraction.Id,
+                type = (int)userInteraction.InteractionType
             };
         }
 

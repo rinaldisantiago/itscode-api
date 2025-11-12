@@ -2,12 +2,11 @@ using Microsoft.AspNetCore.Http; // Necesario para IFormFile
 
 public class PostUserRequestDTO
 {
-    public string FullName { get; set; }
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string Password { get; set; }
-    public int? RoleId { get; set; }
-    public string? URLAvatar { get; set; } = "";
-   
-    public IFormFile? Image { get; set; } 
+    public string fullName { get; set; }
+    public string username { get; set; }
+    public string email { get; set; }
+    public string password { get; set; }
+    public int? roleId { get; set; }
+    public string? urlAvatar { get; set; } = "";
+    public IFormFile? image { get; set; } 
 }
