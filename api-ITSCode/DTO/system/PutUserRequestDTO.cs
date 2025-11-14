@@ -4,5 +4,6 @@ public class PutUserRequestDTO
     public string userName { get; set; } = "";
     public string email { get; set; } = "";
     public string password { get; set; } = "";
-    public string? urlAvatar { get; set; } = "";    // TODO: agregar en el frontend
+    public string? urlAvatar { get; set; } = "";    
+    public IFormFile? image { get; set; }
 }

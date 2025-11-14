@@ -14,53 +14,38 @@ namespace apiUser.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private DAOFactory df;
-        // CAMBIO CLAVE: Añadir un campo para el entorno web
         private readonly IWebHostEnvironment _hostEnvironment;
 
-        // CAMBIO CLAVE: Inyectar IWebHostEnvironment en el constructor
         public UserController(ILogger<UserController> logger, DAOFactory df, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
             this.df = df;
-            _hostEnvironment = hostEnvironment; // Guardar la instancia
+            _hostEnvironment = hostEnvironment;
         }
 
         [HttpPost]
-        // CAMBIO CLAVE: Hacer el método asíncrono
         public async Task<IActionResult> CreateUser([FromForm] PostUserRequestDTO request)
         {
             string avatarUrl;
-
-            // CAMBIO CLAVE: LÓGICA REAL PARA GUARDAR EL ARCHIVO
             if (request.image != null && request.image.Length > 0)
             {
-                // 1. Definir la carpeta de destino (dentro de wwwroot para acceso público)
                 string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
                 if (!Directory.Exists(uploadsFolder))
                 {
                     Directory.CreateDirectory(uploadsFolder);
                 }
-
-                // 2. Crear un nombre de archivo único para evitar sobreescrituras
                 string uniqueFileName = $"{request.username}_{Guid.NewGuid().ToString()}{Path.GetExtension(request.image.FileName)}";
                 string filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-                // 3. Guardar el archivo en el disco de forma asíncrona
                 using (var fileStream = new FileStream(filePath, FileMode.Create))
                 {
                     await request.image.CopyToAsync(fileStream);
                 }
-
-                // 4. Generar la URL pública relativa que se guardará en la base de datos
                 avatarUrl = $"/avatars/{uniqueFileName}";
             }
             else
             {
-                // Si no se sube imagen, usamos una por defecto
-                avatarUrl = "/avatars/default.png"; // Asegúrate de tener una imagen default.png en wwwroot/avatars
+                avatarUrl = "/avatars/default.png";
             }
-
-            // --- El resto de tu lógica de creación de usuario permanece igual ---
             Image avatar = new Image
             {
                 Url = avatarUrl
@@ -112,26 +97,55 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        public IActionResult UpdateUser(int id, [FromBody] PutUserRequestDTO request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] PutUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {id} not found." });
+            }
+
+            // ... (actualización de fullName, userName, email, password - sin cambios)
             user.FullName = request.fullName;
             user.UserName = request.userName;
             user.Email = request.email;
-            user.encript(request.password);
-            user.Avatar.Url = request.urlAvatar;
+            if (!string.IsNullOrEmpty(request.password))
+            {
+                user.SetPassword(request.password);
+            }
 
+            // --- LÓGICA DE AVATAR MODIFICADA ---
+            // Prioridad 1: Si se sube un archivo de imagen, se procesa y se guarda.
+            if (request.image != null && request.image.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
+                string uniqueFileName = $"{user.UserName}_{Guid.NewGuid()}{Path.GetExtension(request.image.FileName)}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            User updateUser = this.df.CreateDAOUser().UpdateUser(user);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.image.CopyToAsync(fileStream);
+                }
+                
+                user.Avatar.Url = $"/avatars/{uniqueFileName}";
+            }
+            // Prioridad 2: Si NO se subió archivo, pero SÍ se proporcionó una URL, se usa esa URL.
+            else if (!string.IsNullOrEmpty(request.urlAvatar))
+            {
+                // Aquí podrías añadir validación para asegurarte de que es una URL válida.
+                user.Avatar.Url = request.urlAvatar;
+            }
+            // Si no se proporciona ni archivo ni URL, el avatar actual no se modifica.
 
+            // ... (guardar cambios y devolver respuesta - sin cambios)
+            User updatedUser = this.df.CreateDAOUser().UpdateUser(user);
             PutUserResponseDTO response = new PutUserResponseDTO
             {
-                fullName = updateUser.FullName,
-                userName = updateUser.UserName,
-                email = updateUser.Email,
-                urlAvatar = updateUser.GetAvatar()
+                fullName = updatedUser.FullName,
+                userName = updatedUser.UserName,
+                email = updatedUser.Email,
+                urlAvatar = updatedUser.GetAvatar()
             };
 
             return Ok(response);

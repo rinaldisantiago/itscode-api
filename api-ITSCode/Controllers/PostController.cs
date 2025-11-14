@@ -80,6 +80,49 @@ namespace apiPost.Controllers
             }
         }
 
+        [HttpGet("{id}")]
+        public IActionResult GetPostById(int id, [FromQuery] int idUserLogger)
+        {
+            try
+            {
+                // Validamos que el usuario que hace la petición exista
+                if (this.df.CreateDAOUser().GetUser(idUserLogger) == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                var post = this.df.CreateDAOPost().GetPostById(id);
+
+                if (post == null)
+                {
+                    return NotFound(new { message = "Post not found" });
+                }
+
+                // Mapeamos la entidad Post al DTO de respuesta
+                var postResponse = new GetPostResponseDTO
+                {
+                    id = post.Id,
+                    idUser = post.IdUser,
+                    userName = post.UserName,
+                    userAvatar = post.UserAvatar(),
+                    title = post.Title,
+                    content = post.Content,
+                    commentsCount = post.GetCountComments(),
+                    likesCount = post.GetCountLike(),
+                    dislikesCount = post.GetCountDislike(),
+                    fileUrl = post.GetUrlImage() ?? "",
+                    comments = post.GetComments(), // Incluye los comentarios
+                    userInteraction = GetUserInteraction(post, idUserLogger) // Calcula la interacción del usuario
+                };
+
+                return Ok(postResponse);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting post with id {PostId}", id);
+                return StatusCode(500, new { message = "An unexpected error occurred.", error = ex.Message });
+            }
+        }
 
         // Método auxiliar para obtener la interacción del usuario
         private UserInteractionResponseDTO GetUserInteraction(Post post, int userId)
