@@ -1,4 +1,5 @@
 ﻿using entity_library;
+using BCryptNet = BCrypt.Net.BCrypt;
 
 public class User : Person
 {
@@ -41,18 +42,13 @@ public class User : Person
             return "No avatar assigned";
     }
 
-    public string encript(string password)
+    public string SetPassword(string password)
     {
-        return password + "123456";
-    }
-    public void SetPassword(string password)
-    {
-        this.password = this.encript(password);
+        return this.password = BCryptNet.HashPassword(password);
     }
     public bool IsPasswordValid(string password)
     {
-        string hashPassword = this.encript(password);
-        return hashPassword == this.Password;
+        return BCryptNet.Verify(password, this.Password);
     }
     
 

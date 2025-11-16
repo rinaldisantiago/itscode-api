@@ -62,7 +62,7 @@ namespace apiUser.Controllers
                 FullName = request.fullName,
                 UserName = request.username,
                 Email = request.email,
-                Password = request.password,
+                Password = new User().SetPassword(request.password),
                 Role = role,
                 Avatar = avatar
             };
@@ -77,13 +77,13 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpGet]
-        public IActionResult getUser([FromQuery] GetUserRequestDTO request)
+        [HttpGet("{id}")]
+        public IActionResult getUser([FromRoute] int id)
         {
-            User user = this.df.CreateDAOUser().GetUser(request.id);
+            User user = this.df.CreateDAOUser().GetUser(id);
             if (user == null)
             {
-                return NotFound(new { message = $"User with ID {request.id} not found." });
+                return NotFound(new { message = $"User with ID {id} not found." });
             }
 
             GetUserResponseDTO response = new GetUserResponseDTO
@@ -171,7 +171,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost("{password}/{userName}")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
+        [HttpPost("{password}/{userName}")] 
         public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
         {
             try
@@ -181,13 +181,16 @@ namespace apiUser.Controllers
                     return BadRequest(ModelState);
                 }
 
-                // Aquí el request.userName y request.password vienen del cuerpo (body) de la solicitud HTTP
 
-                string encryptedPassword = new User().encript(request.password);
-
-                User user = this.df.CreateDAOUser().Login(request.userName, encryptedPassword);
+                User user = this.df.CreateDAOUser().Login(request.userName);
 
                 if (user == null)
+                {
+                    return Unauthorized(new { message = "Invalid username or password." });
+                }
+
+                bool isPasswordValid = user.IsPasswordValid(request.password);
+                if (!isPasswordValid)
                 {
                     return Unauthorized(new { message = "Invalid username or password." });
                 }
@@ -227,7 +230,7 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet]
+        [HttpGet("suggestions")]
         public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
@@ -250,7 +253,7 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpGet("{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
+        [HttpGet("search/{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
         public IActionResult GetUsersBySearch([FromRoute] SearchUsersRequestDTO request)
         {
             try

@@ -30,9 +30,9 @@ public class EFDAOUser : DAOUser
         return this.dbContext.Users.FirstOrDefault(user => user.Email == email);
     }
 
-    public User Login(string userName, string password)
+    public User Login(string userName)
     {
-        return this.dbContext.Users.FirstOrDefault(user => user.UserName == userName && user.Password == password);
+        return this.dbContext.Users.FirstOrDefault(user => user.UserName == userName);
     }
 
     public User UpdateUser(User user)
