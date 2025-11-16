@@ -62,7 +62,8 @@ namespace apiPost.Controllers
 
                 var response = new GetAllPostResponseDTO
                 {
-                    posts = postsAll
+                    posts = postsAll,
+                    
                 };
 
                 return Ok(response);

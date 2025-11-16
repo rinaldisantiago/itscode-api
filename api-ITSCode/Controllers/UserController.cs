@@ -144,7 +144,7 @@ namespace apiUser.Controllers
         }
 
 
-        [HttpPost("Login")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
+        [HttpPost("{password}/{userName}")] // 👈 CAMBIO CLAVE: Cambiamos a POST y le damos una ruta específica
         public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
         {
             try
@@ -186,10 +186,12 @@ namespace apiUser.Controllers
                     urlAvatar = user.GetAvatar()
                 };
 
+                ConnectedUsersCounter.Instance.AddUser();
                 return Ok(new
                 {
                     message = "Login successful",
-                    user = response
+                    user = response,
+                    connected = ConnectedUsersCounter.Instance.GetCount()
                 });
             }
             catch (Exception ex)
@@ -198,7 +200,7 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet("Sugerencias")]
+        [HttpGet]
         public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
@@ -257,6 +259,19 @@ namespace apiUser.Controllers
                     error = ex.Message
                 });
             }
+        }
+
+        [HttpPost("{id}")]
+        public IActionResult Logout([FromRoute] PostLogoutRequestDTO request)
+        {
+            User user = this.df.CreateDAOUser().GetUser(request.id);
+            if (user == null) return NotFound();
+            
+            ConnectedUsersCounter.Instance.RemoveUser();
+            return Ok(new {
+                message = "Sesión cerrada correctamente",
+                connected = ConnectedUsersCounter.Instance.GetCount() //TODO: ver sei necesita un dto response
+            });
         }
 
     }
