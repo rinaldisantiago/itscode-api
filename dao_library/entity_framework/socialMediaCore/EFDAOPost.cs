@@ -51,7 +51,7 @@ public class EFDAOPost : DAOPost
                     .Select(f => f.UserFollowed.Id);
 
 
-                query = query.Where(p => followedIds.Contains(p.User.Id));
+                query = query.Where(p => followedIds.Contains(p.User.Id) || p.User.Id == idUserLogger);
             }
         }
         else if (idUserConsultado != 0)

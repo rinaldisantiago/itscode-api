@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
-
+// CAMBIO CLAVE: Añadir estos usings para manejo de archivos y rutas
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace apiUser.Controllers
 {
@@ -11,55 +14,49 @@ namespace apiUser.Controllers
     {
         private readonly ILogger<UserController> _logger;
         private DAOFactory df;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
-        public UserController(ILogger<UserController> logger, DAOFactory df)
+        public UserController(ILogger<UserController> logger, DAOFactory df, IWebHostEnvironment hostEnvironment)
         {
             _logger = logger;
             this.df = df;
+            _hostEnvironment = hostEnvironment;
         }
 
-
         [HttpPost]
-// 🚨 CAMBIO CLAVE: Usamos [FromForm] para leer FormData (campos de texto + archivo)
-        public IActionResult CreateUser([FromForm] PostUserRequestDTO request)
+        public async Task<IActionResult> CreateUser([FromForm] PostUserRequestDTO request)
         {
-            // 1. INICIALIZACIÓN: Definir la URL del avatar
             string avatarUrl;
-
-            if (request.image != null)
+            if (request.image != null && request.image.Length > 0)
             {
-                // 🚨 LÓGICA DE SUBIDA DE ARCHIVO (Delegar la responsabilidad)
-                
-                // Esta es la parte que tienes que implementar usando tu capa DAO/Service.
-                // Aquí se llamaría a un servicio: var uploadedResult = _fileService.Upload(request.Image);
-                
-                // POR AHORA, para probar el flujo completo: simulamos el guardado
-                // y le asignamos una URL (EJEMPLO, DEBES REEMPLAZAR ESTO)
-                avatarUrl = $"http://localhost:5052/avatars/{request.username}_{DateTime.Now.Ticks}.jpg";
-                
-                // Si necesitas guardar el archivo físicamente, el código iría aquí o en un servicio.
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
+                if (!Directory.Exists(uploadsFolder))
+                {
+                    Directory.CreateDirectory(uploadsFolder);
+                }
+                string uniqueFileName = $"{request.username}_{Guid.NewGuid().ToString()}{Path.GetExtension(request.image.FileName)}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.image.CopyToAsync(fileStream);
+                }
+                avatarUrl = $"/avatars/{uniqueFileName}";
             }
             else
             {
-                // Si no hay archivo, usamos la URL por defecto o la que venga en el DTO
-                avatarUrl = request.urlAvatar ?? "https://example.com/default.jpg";
+                avatarUrl = "/avatars/default.png";
             }
-
-            // 2. CREACIÓN DEL OBJETO AVATAR CON LA URL DEFINIDA
             Image avatar = new Image
             {
-                Url = avatarUrl 
+                Url = avatarUrl
             };
 
-            // 3. Lógica de Rol (SIN CAMBIOS)
             Role? role = df.CreateDAORole().GetRoleById(request.roleId ?? (int)RoleEnum.User);
-
             if (role == null || (role.Id != (int)RoleEnum.User && role.Id != (int)RoleEnum.Admin))
             {
                 role = df.CreateDAORole().GetRoleById((int)RoleEnum.User);
             }
-            
-            // 4. CREACIÓN DEL USUARIO (SIN CAMBIOS, usa los datos del 'request')
+
             User user = new User
             {
                 FullName = request.fullName,
@@ -67,11 +64,10 @@ namespace apiUser.Controllers
                 Email = request.email,
                 Password = request.password,
                 Role = role,
-                Avatar = avatar // Usamos el objeto Avatar con la URL
+                Avatar = avatar
             };
 
             user.SetPassword(user.Password);
-
             this.df.CreateDAOUser().CreateUser(user);
 
             PostUserResponseDTO response = new PostUserResponseDTO
@@ -81,12 +77,14 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-
-        [HttpGet("{id}")]
+        [HttpGet]
         public IActionResult getUser([FromQuery] GetUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(request.id);
-            if (user == null) return null;
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {request.id} not found." });
+            }
 
             GetUserResponseDTO response = new GetUserResponseDTO
             {
@@ -99,26 +97,55 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpPut]
-        public IActionResult UpdateUser(int id, [FromBody] PutUserRequestDTO request)
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, [FromForm] PutUserRequestDTO request)
         {
             User user = this.df.CreateDAOUser().GetUser(id);
-            if (user == null) return NotFound();
+            if (user == null)
+            {
+                return NotFound(new { message = $"User with ID {id} not found." });
+            }
+
+            // ... (actualización de fullName, userName, email, password - sin cambios)
             user.FullName = request.fullName;
             user.UserName = request.userName;
             user.Email = request.email;
-            user.encript(request.password);
-            user.Avatar.Url = request.urlAvatar;
+            if (!string.IsNullOrEmpty(request.password))
+            {
+                user.SetPassword(request.password);
+            }
 
+            // --- LÓGICA DE AVATAR MODIFICADA ---
+            // Prioridad 1: Si se sube un archivo de imagen, se procesa y se guarda.
+            if (request.image != null && request.image.Length > 0)
+            {
+                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
+                string uniqueFileName = $"{user.UserName}_{Guid.NewGuid()}{Path.GetExtension(request.image.FileName)}";
+                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-            User updateUser = this.df.CreateDAOUser().UpdateUser(user);
+                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                {
+                    await request.image.CopyToAsync(fileStream);
+                }
+                
+                user.Avatar.Url = $"/avatars/{uniqueFileName}";
+            }
+            // Prioridad 2: Si NO se subió archivo, pero SÍ se proporcionó una URL, se usa esa URL.
+            else if (!string.IsNullOrEmpty(request.urlAvatar))
+            {
+                // Aquí podrías añadir validación para asegurarte de que es una URL válida.
+                user.Avatar.Url = request.urlAvatar;
+            }
+            // Si no se proporciona ni archivo ni URL, el avatar actual no se modifica.
 
+            // ... (guardar cambios y devolver respuesta - sin cambios)
+            User updatedUser = this.df.CreateDAOUser().UpdateUser(user);
             PutUserResponseDTO response = new PutUserResponseDTO
             {
-                fullName = updateUser.FullName,
-                userName = updateUser.UserName,
-                email = updateUser.Email,
-                urlAvatar = updateUser.GetAvatar()
+                fullName = updatedUser.FullName,
+                userName = updatedUser.UserName,
+                email = updatedUser.Email,
+                urlAvatar = updatedUser.GetAvatar()
             };
 
             return Ok(response);
@@ -224,7 +251,7 @@ namespace apiUser.Controllers
         }
 
         [HttpGet("{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
-        public IActionResult GetUsersBySearch([FromRoute] GetAllUsersRequestDTO request)
+        public IActionResult GetUsersBySearch([FromRoute] SearchUsersRequestDTO request)
         {
             try
             {
@@ -234,16 +261,16 @@ namespace apiUser.Controllers
                 var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
 
                 List<User> users = this.df.CreateDAOUser().SearchUsers(request.searchTerm, request.idUserLogger, request.pageNumber, request.pageSize);
-                var allUsers = users.Select(user => new GetUsersResponseDTO
+                var allUsers = users.Select(user => new UserSuggestionDto
                 {
                     id = user.Id,
-                    userAvatar = user.GetAvatar(),
+                    avatar = user.GetAvatar(),
                     userName = user.UserName,
                     isFollowing = followingIds.Contains(user.Id)
                 })
                 .ToList();
 
-                var response = new GetAllUsersResponseDTO
+                var response = new SearchUsersResponseDTO
                 {
                     users = allUsers
                 };
@@ -266,7 +293,7 @@ namespace apiUser.Controllers
         {
             User user = this.df.CreateDAOUser().GetUser(request.id);
             if (user == null) return NotFound();
-            
+
             ConnectedUsersCounter.Instance.RemoveUser();
             return Ok(new {
                 message = "Sesión cerrada correctamente",

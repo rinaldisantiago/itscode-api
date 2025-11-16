@@ -40,6 +40,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseStaticFiles(); 
 // Usar CORS antes de Authorization
 app.UseCors("AllowAll");
 
@@ -47,6 +48,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseStaticFiles(); 
 
 app.Run();
