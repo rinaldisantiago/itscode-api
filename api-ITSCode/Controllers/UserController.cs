@@ -114,6 +114,7 @@ namespace apiUser.Controllers
             };
             return Ok(response);
         }
+        
 
         [HttpGet("{id}")]
         public IActionResult getUser([FromRoute] int id)
@@ -135,13 +136,13 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateUser(int id, [FromForm] PutUserRequestDTO request)
+        [HttpPut]
+        public async Task<IActionResult> UpdateUser([FromForm] PutUserRequestDTO request)
         {
-            User user = this.df.CreateDAOUser().GetUser(id);
+            User user = this.df.CreateDAOUser().GetUser(request.id);
             if (user == null)
             {
-                return NotFound(new { message = $"User with ID {id} not found." });
+                return NotFound(new { message = $"User with ID {request.id} not found." });
             }
 
             // ... (actualización de fullName, userName, email, password - sin cambios)
@@ -202,84 +203,23 @@ namespace apiUser.Controllers
                 message = "User deleted successfully",
             };
 
-
             return Ok(response);
 
-
         }
 
 
-        [HttpPost("{password}/{userName}")] 
-        public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                {
-                    return BadRequest(ModelState);
-                }
-
-
-                User user = this.df.CreateDAOUser().Login(request.userName);
-
-                if (user == null)
-                {
-                    return Unauthorized(new { message = "Invalid username or password." });
-                }
-
-                bool isPasswordValid = user.IsPasswordValid(request.password);
-                if (!isPasswordValid)
-                {
-                    return Unauthorized(new { message = "Invalid username or password." });
-                }
-
-                if (user.IsBanned)
-                {
-                    Ban ban = this.df.CreateDAOBan().GetBanByUserId(user);
-                  
-                    return Unauthorized(new
-                    {
-                        message = "Usuario Baneado.",
-                        reason = ban.Reason,
-                    });
-
-                }
-
-                LoginResponseDTO response = new LoginResponseDTO
-                {
-                    id = user.Id,
-                    fullName = user.FullName,
-                    userName = user.UserName,
-                    email = user.Email,
-                    urlAvatar = user.GetAvatar()
-                };
-
-                ConnectedUsersCounter.Instance.AddUser();
-                return Ok(new
-                {
-                    message = "Login successful",
-                    user = response,
-                    connected = ConnectedUsersCounter.Instance.GetCount()
-                });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        [HttpGet("suggestions")]
-        public IActionResult Sugerencias([FromQuery] GetSugerenciasResquestDTO request)
+        [HttpGet("Suggestions/{idUserLogger}/{page}/{pageSize}")]
+        public IActionResult suggestion([FromRoute] GetSugerenciasResquestDTO request)
         {
             // Obtener sugerencias desde el DAO
             var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
-            List<User> sugerencias = this.df.CreateDAOUser()
+            List<User> suggestion = this.df.CreateDAOUser()
                 .GetSugerencias(request.idUserLogger, request.page, request.pageSize, followingIds);
 
             // Mapear a DTO de respuesta
             GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
             {
-                suggestions = sugerencias.Select(u => new UserSuggestionDto
+                suggestions = suggestion.Select(u => new UserSuggestionDto
                 {
                     id = u.Id,
                     userName = u.UserName,
@@ -291,8 +231,8 @@ namespace apiUser.Controllers
             return Ok(response);
         }
 
-        [HttpGet("search/{searchTerm}/{idUserLogger}/{pageNumber}/{pageSize}")]
-        public IActionResult GetUsersBySearch([FromRoute] SearchUsersRequestDTO request)
+        [HttpGet]
+        public IActionResult GetUsersBySearch([FromQuery] SearchUsersRequestDTO request)
         {
             try
             {
@@ -329,18 +269,7 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpPost("{id}")]
-        public IActionResult Logout([FromRoute] PostLogoutRequestDTO request)
-        {
-            User user = this.df.CreateDAOUser().GetUser(request.id);
-            if (user == null) return NotFound();
-
-            ConnectedUsersCounter.Instance.RemoveUser();
-            return Ok(new {
-                message = "Sesión cerrada correctamente",
-                connected = ConnectedUsersCounter.Instance.GetCount() //TODO: ver sei necesita un dto response
-            });
-        }
+        
 
     }
 }
