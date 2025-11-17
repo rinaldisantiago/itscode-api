@@ -5,6 +5,7 @@ using entity_library;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace apiUser.Controllers
 {
@@ -26,6 +27,43 @@ namespace apiUser.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUser([FromForm] PostUserRequestDTO request)
         {
+            //Validar todas las entradas
+            if(String.IsNullOrEmpty(request.fullName) ||
+               String.IsNullOrEmpty(request.username) ||
+               String.IsNullOrEmpty(request.email) ||
+               String.IsNullOrEmpty(request.password))
+            {
+                return BadRequest(new { message = "Algunos campos son obligatorios" } );
+            }
+
+            //Validar formato fullname
+            string pattern = @"^(?=.{1,50}$)[a-zA-ZÀ-ÿ]+( [a-zA-ZÀ-ÿ]+)+$";
+            if (!Regex.IsMatch(request.fullName, pattern, RegexOptions.None))
+            {
+                return BadRequest(new { message = "El nombre completo no cumple con el formato requerido" });
+            }
+
+            //Validar formato username
+            pattern = @"^(?=.{5,25}$)[a-zA-Z0-9_]+$";
+            if (!Regex.IsMatch(request.username, pattern, RegexOptions.None))
+            {
+                return BadRequest(new { message = "El nombre de usuario no cumple con el formato requerido" });
+            }
+
+            //Validar formato email
+            pattern = @"^[^\s@]+@[^\s@]+\.[^\s@]+$";
+            if (!Regex.IsMatch(request.email, pattern, RegexOptions.IgnoreCase))
+            {
+                return BadRequest(new { message = "El correo electrónico no tiene el formato requerido" });
+            }
+
+            //Validar formato password
+            pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+            if (!Regex.IsMatch(request.password, pattern, RegexOptions.None))
+            {
+                return BadRequest(new { message = "La contraseña no cumple con los requisitos mínimos" });
+            }
+
             string avatarUrl;
             if (request.image != null && request.image.Length > 0)
             {
