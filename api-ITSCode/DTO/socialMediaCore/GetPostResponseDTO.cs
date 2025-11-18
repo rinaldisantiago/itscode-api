@@ -12,7 +12,7 @@ public class GetPostResponseDTO
     public string userName { get; set; } = "";
     public string userAvatar { get; set; } = "";
 
-    public List<object> comments { get; set; } 
+    public List<CommentDTO> comments { get; set; } = new List<CommentDTO>();
     public UserInteractionResponseDTO userInteraction { get; set; }
 
 }

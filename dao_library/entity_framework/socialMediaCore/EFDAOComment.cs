@@ -22,10 +22,12 @@ public class EFDAOComment : DAOComment
             .FirstOrDefault(c => c.Id == id);
     }
 
-    public List<Comment> GetCommentsByPostId(int postId)
+    public List<Comment> GetCommentsByPostId(int postId, int pageNumber, int pageSize)
     {
         return dbContext.Coments
             .Where(c => c.Post != null && c.Post.Id == postId)
+            .Skip((pageNumber - 1) * pageSize)  
+            .Take(pageSize)
             .ToList();
     }
 

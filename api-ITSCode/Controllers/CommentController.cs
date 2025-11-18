@@ -90,5 +90,26 @@ namespace apiComment.Controllers
 
             return Ok(response);
         }
+
+        [HttpGet]
+        public IActionResult GetCommentsByPostId([FromQuery] GetCommentRequestDTO request)
+        {
+            var comments = this.df.CreateDAOComment().GetCommentsByPostId(request.postId, request.pageNumber, request.pageSize);
+            var response = new GetCommentResponseDTO
+            {
+                comments = comments.Select(c => new CommentDTO
+                {
+                    id = c.Id,
+                    userId = c.User.Id,
+                    postId = c.Post.Id,
+                    content = c.Content,
+                    createdAt = c.CreatedAt
+                }).ToList()
+            };
+
+            return Ok(response);
+        }
     }
+
+
 }

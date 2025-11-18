@@ -43,6 +43,10 @@ namespace apiPost.Controllers
                     pageSize
                 );
                 
+                // Normalizar paginación de comentarios por si vienen vacíos
+                int validPageNumberComments = request.pageNumberComments <= 0 ? 1 : request.pageNumberComments;
+                int validPageSizeComments = request.pageSizeComments <= 0 ? 1 : request.pageSizeComments;
+
                 var postsAll = posts
                     .Select(post => new GetPostResponseDTO
                     {
@@ -56,7 +60,15 @@ namespace apiPost.Controllers
                         likesCount = post.GetCountLike(),
                         dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
-                        comments = post.GetComments(request.pageNumberComments, request.pageSizeComments), 
+                        comments = this.df.CreateDAOComment()
+                                    .GetCommentsByPostId(post.Id, validPageNumberComments, validPageSizeComments)
+                                    .Select(c => new CommentDTO {
+                                        id = c.Id,
+                                        userId = c.User?.Id ?? 0,
+                                        postId = c.Post?.Id ?? 0,
+                                        content = c.Content ?? "",
+                                        createdAt = c.CreatedAt
+                                    }).ToList(), 
                         userInteraction = GetUserInteraction(post, request.idUserLogger)
 
                     })
@@ -81,28 +93,28 @@ namespace apiPost.Controllers
             }
         }
 
-        [HttpGet("{id}/{idUserLogger}")]
+        [HttpGet("{id}/{idUserLogger}/{pageNumberComments}/{pageSizeComments}")]
         public IActionResult GetPostById([FromRoute] GetPostRequestDTO request)
         {
-            int id = request.id;
-            int idUserLogger = request.idUserLogger;
 
-      
-        
             try
             {
                 // Validamos que el usuario que hace la petición exista
-                if (this.df.CreateDAOUser().GetUser(idUserLogger) == null)
+                if (this.df.CreateDAOUser().GetUser(request.idUserLogger) == null)
                 {
                     return Unauthorized("Invalid user.");
                 }
 
-                var post = this.df.CreateDAOPost().GetPostById(id);
+                var post = this.df.CreateDAOPost().GetPostById(request.id);
 
                 if (post == null)
                 {
                     return NotFound(new { message = "Post not found" });
                 }
+
+                // Normalizar paginación de comentarios por si vienen vacíos
+                int validPageNumberCommentsReq = request.pageNumberComments <= 0 ? 1 : request.pageNumberComments;
+                int validPageSizeCommentsReq = request.pageSizeComments <= 0 ? 1 : request.pageSizeComments;
 
                 // Mapeamos la entidad Post al DTO de respuesta
                 var postResponse = new GetPostResponseDTO
@@ -117,15 +129,23 @@ namespace apiPost.Controllers
                     likesCount = post.GetCountLike(),
                     dislikesCount = post.GetCountDislike(),
                     fileUrl = post.GetUrlImage() ?? "",
-                    comments = post.GetComments(request.pageNumberComments, request.pageSizeComments), 
-                    userInteraction = GetUserInteraction(post, idUserLogger) 
+                    comments = this.df.CreateDAOComment()
+                                .GetCommentsByPostId(request.id, validPageNumberCommentsReq, validPageSizeCommentsReq)
+                                .Select(c => new CommentDTO {
+                                    id = c.Id,
+                                    userId = c.User?.Id ?? 0,
+                                    postId = c.Post?.Id ?? 0,
+                                    content = c.Content ?? "",
+                                    createdAt = c.CreatedAt
+                                }).ToList(), // Paginación fija para comentarios
+                    userInteraction = GetUserInteraction(post, request.idUserLogger) 
                 };
 
                 return Ok(postResponse);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting post with id {PostId}", id);
+                _logger.LogError(ex, "Error getting post with id {PostId}", request.id);
                 return StatusCode(500, new { message = "An unexpected error occurred.", error = ex.Message });
             }
         
