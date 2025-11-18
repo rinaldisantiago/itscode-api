@@ -28,7 +28,12 @@ namespace apiComment.Controllers
 
                 if (user == null || post == null)
                 {
-                    return NotFound("User or Post not found");
+                    return NotFound(new { message = "User or Post not found" });
+                }
+
+                if(String.IsNullOrWhiteSpace(request.content))
+                {
+                    return BadRequest(new { message = "El comentario no puede estar vacío." });
                 }
 
                 Comment newComment = new Comment
