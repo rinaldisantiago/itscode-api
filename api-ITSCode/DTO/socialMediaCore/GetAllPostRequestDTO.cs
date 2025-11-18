@@ -7,4 +7,7 @@ public class GetAllPostRequestDTO
     public int pageNumber { get; set; }
     public int pageSize { get; set; }
 
+    public int pageNumberComments { get; set; }
+    public int pageSizeComments { get; set; }
+
 }

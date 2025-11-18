@@ -115,7 +115,7 @@ public class Post
     private List<Comment>? comments;
     public virtual List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
 
-    public List<object> GetComments()
+    public List<object> GetComments(int pageNumber, int pageSize )
     {
         if (this.Comments == null)
         {
@@ -130,6 +130,8 @@ public class Post
 
         })
         .Cast<object>()
+        .Skip((pageNumber - 1) * pageSize)  
+        .Take(pageSize)
         .ToList();
     }
     public int GetCountComments()

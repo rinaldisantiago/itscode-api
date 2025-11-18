@@ -56,7 +56,7 @@ namespace apiPost.Controllers
                         likesCount = post.GetCountLike(),
                         dislikesCount = post.GetCountDislike(),
                         fileUrl = post.GetUrlImage() ?? "",
-                        comments = post.GetComments(),
+                        comments = post.GetComments(request.pageNumberComments, request.pageSizeComments), 
                         userInteraction = GetUserInteraction(post, request.idUserLogger)
 
                     })
@@ -81,9 +81,14 @@ namespace apiPost.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public IActionResult GetPostById(int id, [FromQuery] int idUserLogger)
+        [HttpGet("{id}/{idUserLogger}")]
+        public IActionResult GetPostById([FromRoute] GetPostRequestDTO request)
         {
+            int id = request.id;
+            int idUserLogger = request.idUserLogger;
+
+      
+        
             try
             {
                 // Validamos que el usuario que hace la petición exista
@@ -112,8 +117,8 @@ namespace apiPost.Controllers
                     likesCount = post.GetCountLike(),
                     dislikesCount = post.GetCountDislike(),
                     fileUrl = post.GetUrlImage() ?? "",
-                    comments = post.GetComments(), // Incluye los comentarios
-                    userInteraction = GetUserInteraction(post, idUserLogger) // Calcula la interacción del usuario
+                    comments = post.GetComments(request.pageNumberComments, request.pageSizeComments), 
+                    userInteraction = GetUserInteraction(post, idUserLogger) 
                 };
 
                 return Ok(postResponse);
@@ -123,6 +128,7 @@ namespace apiPost.Controllers
                 _logger.LogError(ex, "Error getting post with id {PostId}", id);
                 return StatusCode(500, new { message = "An unexpected error occurred.", error = ex.Message });
             }
+        
         }
 
         // Método auxiliar para obtener la interacción del usuario
