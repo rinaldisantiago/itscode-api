@@ -34,6 +34,11 @@ namespace apiUser.Controllers
                     return BadRequest(ModelState);
                 }
 
+                if(String.IsNullOrWhiteSpace(request.userName) || 
+                   String.IsNullOrWhiteSpace(request.password))
+                {
+                    return BadRequest(new { message = "Usuario y/o contraseña son obligatorios." });
+                }
 
                 User user = this.df.CreateDAOUser().Login(request.userName);
 
