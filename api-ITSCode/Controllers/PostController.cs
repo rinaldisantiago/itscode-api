@@ -163,6 +163,12 @@ namespace apiPost.Controllers
                 return Unauthorized("Invalid user.");
             }
 
+            if(String.IsNullOrWhiteSpace(request.title) ||
+               String.IsNullOrWhiteSpace(request.content))
+            {
+                return BadRequest(new { message = "Debe ingresar un título y/o contenido." });
+            }
+
             string finalFileUrl = null;
 
             if (request.File != null && request.File.Length > 0)
