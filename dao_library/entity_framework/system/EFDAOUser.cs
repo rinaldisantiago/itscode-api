@@ -25,9 +25,14 @@ public class EFDAOUser : DAOUser
         return this.dbContext.Users.FirstOrDefault(user => user.Id == idUser);
     }
 
-    public User? GetUserByEmail(string email)
+    public bool GetUserByUsername(string username)
     {
-        return this.dbContext.Users.FirstOrDefault(user => user.Email == email);
+        return this.dbContext.Users.Any(user => user.UserName == username.Trim());
+    }
+
+    public bool GetUserByEmail(string email)
+    {
+        return this.dbContext.Users.Any(user => user.Email == email.Trim().ToLower());
     }
 
     public User Login(string userName)
@@ -58,17 +63,17 @@ public class EFDAOUser : DAOUser
             return sugerencias;
         }
 
-        public List<User> SearchUsers(string searchTerm, int idUserLogger ,int pageNumber, int pageSize)
-        {
-            var user = this.dbContext.Users.FirstOrDefault(u => u.Id == idUserLogger);
-            if (user == null) return new List<User>();
+    public List<User> SearchUsers(string searchTerm, int idUserLogger ,int pageNumber, int pageSize)
+    {
+        var user = this.dbContext.Users.FirstOrDefault(u => u.Id == idUserLogger);
+        if (user == null) return new List<User>();
 
-            return this.dbContext.Users
-            .Where(u => u.Id != idUserLogger && 
-                        (u.UserName.Trim().ToLower().Contains(searchTerm.Trim().ToLower()) || 
-                        u.FullName.Trim().ToLower().Contains(searchTerm.Trim().ToLower())))
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-        }
+        return this.dbContext.Users
+        .Where(u => u.Id != idUserLogger && 
+                    (u.UserName.Trim().ToLower().Contains(searchTerm.Trim().ToLower()) || 
+                    u.FullName.Trim().ToLower().Contains(searchTerm.Trim().ToLower())))
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .ToList();
+    }
 }
