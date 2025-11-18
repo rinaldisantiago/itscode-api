@@ -28,10 +28,10 @@ namespace apiUser.Controllers
         public async Task<IActionResult> CreateUser([FromForm] PostUserRequestDTO request)
         {
             //Validar todas las entradas
-            if(String.IsNullOrEmpty(request.fullName) ||
-               String.IsNullOrEmpty(request.username) ||
-               String.IsNullOrEmpty(request.email) ||
-               String.IsNullOrEmpty(request.password))
+            if(String.IsNullOrWhiteSpace(request.fullName) ||
+               String.IsNullOrWhiteSpace(request.username) ||
+               String.IsNullOrWhiteSpace(request.email) ||
+               String.IsNullOrWhiteSpace(request.password))
             {
                 return BadRequest(new { message = "Algunos campos son obligatorios" } );
             }
@@ -63,6 +63,20 @@ namespace apiUser.Controllers
             {
                 return BadRequest(new { message = "La contraseña no cumple con los requisitos mínimos" });
             }
+
+            //Validar username existente
+            bool userExists = this.df.CreateDAOUser().GetUserByUsername(request.username);
+            if(userExists)
+            {
+                return BadRequest(new { message = "El nombre de usuario ya existe" });
+            }
+
+            //Validar email existente
+            bool emailExists = this.df.CreateDAOUser().GetUserByEmail(request.email);
+            if (emailExists)
+            {
+                return BadRequest(new { message = "El email ya existe" });
+            }     
 
             string avatarUrl;
             if (request.image != null && request.image.Length > 0)
@@ -97,10 +111,10 @@ namespace apiUser.Controllers
 
             User user = new User
             {
-                FullName = request.fullName,
-                UserName = request.username,
-                Email = request.email,
-                Password = new User().SetPassword(request.password),
+                FullName = request.fullName.Trim(),
+                UserName = request.username.Trim(),
+                Email = request.email.Trim().ToLower(),
+                Password = new User().SetPassword(request.password).Trim(),
                 Role = role,
                 Avatar = avatar
             };
@@ -145,12 +159,71 @@ namespace apiUser.Controllers
                 return NotFound(new { message = $"User with ID {request.id} not found." });
             }
 
-            // ... (actualización de fullName, userName, email, password - sin cambios)
-            user.FullName = request.fullName;
-            user.UserName = request.userName;
-            user.Email = request.email;
+            if (!string.IsNullOrEmpty(request.fullName))
+            {
+                string newFullName = request.fullName.Trim();
+                string patternFullName = @"^(?=.{1,50}$)[a-zA-ZÀ-ÿ]+( [a-zA-ZÀ-ÿ]+)+$";
+
+                if (!Regex.IsMatch(newFullName, patternFullName, RegexOptions.None))
+                {
+                    return BadRequest(new { message = "El nombre completo no cumple con el formato requerido." });
+                }
+
+                user.FullName = newFullName;
+            }
+
+            if (!string.IsNullOrEmpty(request.userName))
+            {
+                string newUserName = request.userName.Trim();
+
+                if (user.UserName != newUserName)
+                {
+                    string patternUser = @"^(?=.{5,25}$)[a-zA-Z0-9_]+$";
+                    if (!Regex.IsMatch(newUserName, patternUser, RegexOptions.None))
+                    {
+                        return BadRequest(new { message = "El nombre de usuario no tiene un formato válido." });
+                    }
+
+                    bool userExists = this.df.CreateDAOUser().GetUserByUsername(newUserName);
+                    if (userExists)
+                    {
+                        return BadRequest(new { message = "El nombre de usuario ya está en uso." });
+                    }
+
+                    user.UserName = newUserName;
+                }
+            }
+
+            if (!string.IsNullOrEmpty(request.email))
+            {
+                string newEmail = request.email.Trim().ToLower();
+
+                if (user.Email != newEmail)
+                {
+                    string patternEmail = @"^[^\s@]+@[^\s@]+\.[^\s@]+$";
+                    if (!Regex.IsMatch(newEmail, patternEmail, RegexOptions.IgnoreCase))
+                    {
+                        return BadRequest(new { message = "El formato del correo no es válido." });
+                    }
+
+                    bool emailExists = this.df.CreateDAOUser().GetUserByEmail(newEmail);
+                    if (emailExists)
+                    {
+                        return BadRequest(new { message = "El correo electrónico ya está registrado." });
+                    }
+
+                    user.Email = newEmail;
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.password))
             {
+                string patternPass = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
+                if (!Regex.IsMatch(request.password, patternPass, RegexOptions.None))
+                {
+                    return BadRequest(new { message = "La contraseña no cumple con los requisitos mínimos." });
+                }
+
                 user.SetPassword(request.password);
             }
 
