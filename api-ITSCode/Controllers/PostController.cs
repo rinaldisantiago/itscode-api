@@ -248,13 +248,14 @@ namespace apiPost.Controllers
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
 
-            if (post.User.Id != user.Id)
+            if (post.User is null || post.User.Id != user.Id)
             {
                 return Forbid("User is not the author of the post.");
             }
 
             this.df.CreateDAOPost().DeletePost(request.id);
-            this.df.CreateDAOFile().DeleteFile(post.File.Id);
+            
+            if(post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
 
             DeletePostResponseDTO response = new DeletePostResponseDTO
             {
@@ -277,14 +278,35 @@ namespace apiPost.Controllers
             Post post = this.df.CreateDAOPost().GetPostById(request.id);
             if (post == null) return NotFound();
 
-            if (post.User.Id != user.Id)
+            if (post.User is null || post.User.Id != user.Id)
             {
                 return Forbid("User is not the author of the post.");
             }
 
-            post.Title = request.title;
-            post.Content = request.content;
-            post.File.Url = request.fileUrl;
+            //Validar los campos de post
+            if(!String.IsNullOrWhiteSpace(request.title))
+            {
+                post.Title = request.title.Trim();
+            }
+
+            if(!String.IsNullOrWhiteSpace(request.content))
+            {
+                post.Content = request.content.Trim();
+            }
+
+            if(!String.IsNullOrWhiteSpace(request.fileUrl))
+            {
+                if(post.File == null) post.File = new File();
+                post.File.Url = request.fileUrl.Trim();
+            }
+
+            if(request.fileUrl == "")
+            {
+                if(post.File != null)
+                {
+                    post.File.Url = null;
+                }
+            }
 
             this.df.CreateDAOPost().UpdatePost(post);
 
