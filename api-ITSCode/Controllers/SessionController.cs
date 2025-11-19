@@ -41,14 +41,9 @@ namespace apiUser.Controllers
                 }
 
                 User user = this.df.CreateDAOUser().Login(request.userName);
-
-                if (user == null)
-                {
-                    return Unauthorized(new { message = "Invalid username or password." });
-                }
-
                 bool isPasswordValid = user.IsPasswordValid(request.password);
-                if (!isPasswordValid)
+
+                if (user == null || !isPasswordValid)
                 {
                     return Unauthorized(new { message = "Invalid username or password." });
                 }
