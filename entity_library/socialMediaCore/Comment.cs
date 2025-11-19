@@ -6,7 +6,7 @@ public class Comment
     private int id;
     private User? user;
     private Post? post;
-    private string content;
+    private string? content;
     private DateTime createdAt;
 
 

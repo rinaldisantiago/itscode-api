@@ -61,14 +61,22 @@ namespace apiComment.Controllers
         [HttpDelete]
         public IActionResult DeleteComment([FromQuery] DeleteCommentRequestDTO request)
         {
-            Comment comment = this.df.CreateDAOComment().GetCommentById(request.id);
-            if (comment == null) return NotFound();
+            User? user = this.df.CreateDAOUser().GetUser(request.idUser);
+            if(user is null) return Unauthorized(new { message = "Usuario inválido." });
+
+            Comment? comment = this.df.CreateDAOComment().GetCommentById(request.id);
+            if (comment is null) return NotFound(new { message = "Comentario no encontrado." });
+
+            if(comment.User is null || comment.User.Id != user.Id)
+            {
+                return Forbid("El usuario no es el autor del comentario.");
+            }
 
             this.df.CreateDAOComment().DeleteComment(request.id);
 
             DeleteCommentResponseDTO response = new DeleteCommentResponseDTO
             {
-                message = "Comment deleted successfully"
+                message = "Comentario eliminado exitosamente."
             };
 
             return Ok(response);
