@@ -131,7 +131,7 @@ namespace apiUser.Controllers
         
 
         [HttpGet("{id}")]
-        public IActionResult getUser([FromRoute] int id)
+        public IActionResult getUser([FromRoute] int id, [FromQuery] int idUserLogger)
         {
             User user = this.df.CreateDAOUser().GetUser(id);
             if (user == null)
@@ -139,12 +139,24 @@ namespace apiUser.Controllers
                 return NotFound(new { message = $"User with ID {id} not found." });
             }
 
+            bool isFollowing = false;
+                if (idUserLogger > 0) // Solo calculamos si se nos pasa un usuario logueado válido.
+                {
+                    // 1. Obtenemos la lista de IDs que el usuario logueado sigue.
+                    var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(idUserLogger);
+                    
+                    // 2. Comprobamos si el ID del perfil visitado está en esa lista.
+                    isFollowing = followingIds.Contains(id);
+                }
+
             GetUserResponseDTO response = new GetUserResponseDTO
             {
+                id = user.Id,
                 fullName = user.FullName,
                 userName = user.UserName,
                 email = user.Email,
-                urlAvatar = user.GetAvatar()
+                urlAvatar = user.GetAvatar(),
+                isFollowing = isFollowing
             };
 
             return Ok(response);
