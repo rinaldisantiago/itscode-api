@@ -84,13 +84,13 @@ namespace apiPost.Controllers
 
                 return Ok(response);
             }
-            catch (Exception ex)
+
+            catch(Exception ex)
             {
-                // ... (Manejo de errores) ...
                 return StatusCode(500, new
                 {
-                    message = "An unexpected error occurred.",
-                    error = ex.Message,
+                    message = "Error interno del servidor.",
+                    error = ex.Message
                 });
             }
         }
@@ -98,7 +98,6 @@ namespace apiPost.Controllers
         [HttpGet("{id}/{idUserLogger}/{pageNumberComments}/{pageSizeComments}")]
         public IActionResult GetPostById([FromRoute] GetPostRequestDTO request)
         {
-
             try
             {
                 // Validamos que el usuario que hace la petición exista
@@ -181,145 +180,181 @@ namespace apiPost.Controllers
         [Consumes("multipart/form-data")]
         public IActionResult PostCreate([FromForm] PostPostRequestDTO request)
         {
-            var user = this.df.CreateDAOUser().GetUser(request.idUser);
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid user.");
-            }
-
-            if(String.IsNullOrWhiteSpace(request.title) ||
-               String.IsNullOrWhiteSpace(request.content))
-            {
-                return BadRequest(new { message = "Debe ingresar un título y/o contenido." });
-            }
-
-            string finalFileUrl = null;
-
-            if (request.File != null && request.File.Length > 0)
-            {
-                string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "posts_files");
-                if (!Directory.Exists(uploadsFolder))
+                var user = this.df.CreateDAOUser().GetUser(request.idUser);
+                if (user == null)
                 {
-                    Directory.CreateDirectory(uploadsFolder);
+                    return Unauthorized("Invalid user.");
                 }
-                string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.File.FileName;
-                string filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+                if(String.IsNullOrWhiteSpace(request.title) ||
+                String.IsNullOrWhiteSpace(request.content))
                 {
-                    request.File.CopyTo(fileStream);
+                    return BadRequest(new { message = "Debe ingresar un título y/o contenido." });
                 }
-                
-                finalFileUrl = $"/posts_files/{uniqueFileName}";
+
+                string finalFileUrl = null;
+
+                if (request.File != null && request.File.Length > 0)
+                {
+                    string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "posts_files");
+                    if (!Directory.Exists(uploadsFolder))
+                    {
+                        Directory.CreateDirectory(uploadsFolder);
+                    }
+                    string uniqueFileName = Guid.NewGuid().ToString() + "_" + request.File.FileName;
+                    string filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+                    using (var fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        request.File.CopyTo(fileStream);
+                    }
+                    
+                    finalFileUrl = $"/posts_files/{uniqueFileName}";
+                }
+                else if (!string.IsNullOrEmpty(request.fileUrl))
+                {
+                    finalFileUrl = request.fileUrl;
+                }
+
+                File fileEntity = new File { Url = finalFileUrl };
+
+                Post newPost = new Post
+                {
+                    Title = request.title,
+                    Content = request.content,
+                    User = this.df.CreateDAOUser().GetUser(request.idUser),
+                    File = fileEntity,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                this.df.CreateDAOPost().CreatePost(newPost);
+
+                PostPostResponseDTO response = new PostPostResponseDTO
+                {
+                    message = "Post created successfully",
+                    idUser = newPost.User.Id
+                };
+
+                return StatusCode(201, response);
+            } 
+            
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
             }
-            else if (!string.IsNullOrEmpty(request.fileUrl))
-            {
-                finalFileUrl = request.fileUrl;
-            }
-
-            File fileEntity = new File { Url = finalFileUrl };
-
-            Post newPost = new Post
-            {
-                Title = request.title,
-                Content = request.content,
-                User = this.df.CreateDAOUser().GetUser(request.idUser),
-                File = fileEntity,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            this.df.CreateDAOPost().CreatePost(newPost);
-
-            PostPostResponseDTO response = new PostPostResponseDTO
-            {
-                message = "Post created successfully",
-                idUser = newPost.User.Id
-            };
-
-            return StatusCode(201, response);
         }
 
 
         [HttpDelete]
         public IActionResult DeletePost([FromQuery] DeletePostRequestDTO request)
         {
-            var user = this.df.CreateDAOUser().GetUser(request.idUser);
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid user.");
+                var user = this.df.CreateDAOUser().GetUser(request.idUser);
+                if (user == null)
+                {
+                    return Unauthorized("Invalid user.");
+                }
+
+                Post post = this.df.CreateDAOPost().GetPostById(request.id);
+                if (post == null) return NotFound();
+
+                if (post.User is null || post.User.Id != user.Id)
+                {
+                    return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
+                }
+
+                this.df.CreateDAOPost().DeletePost(request.id);
+                
+                if(post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
+
+                DeletePostResponseDTO response = new DeletePostResponseDTO
+                {
+                    message = "Post deleted successfully",
+                    idPost = post.Id
+                };
+
+                return Ok(response);             
             }
 
-            Post post = this.df.CreateDAOPost().GetPostById(request.id);
-            if (post == null) return NotFound();
-
-            if (post.User is null || post.User.Id != user.Id)
+            catch(Exception ex)
             {
-                return Forbid("User is not the author of the post.");
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
             }
-
-            this.df.CreateDAOPost().DeletePost(request.id);
-            
-            if(post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
-
-            DeletePostResponseDTO response = new DeletePostResponseDTO
-            {
-                message = "Post deleted successfully",
-                idPost = post.Id
-            };
-
-            return Ok(response);
         }
 
         [HttpPut]
         public IActionResult UpdatePost([FromBody] UpdatePostRequestDTO request)
         {
-            var user = this.df.CreateDAOUser().GetUser(request.idUser);
-            if (user == null)
+            try
             {
-                return Unauthorized("Invalid user.");
-            }
-
-            Post post = this.df.CreateDAOPost().GetPostById(request.id);
-            if (post == null) return NotFound();
-
-            if (post.User is null || post.User.Id != user.Id)
-            {
-                return Forbid("User is not the author of the post.");
-            }
-
-            //Validar los campos de post
-            if(!String.IsNullOrWhiteSpace(request.title))
-            {
-                post.Title = request.title.Trim();
-            }
-
-            if(!String.IsNullOrWhiteSpace(request.content))
-            {
-                post.Content = request.content.Trim();
-            }
-
-            if(!String.IsNullOrWhiteSpace(request.fileUrl))
-            {
-                if(post.File == null) post.File = new File();
-                post.File.Url = request.fileUrl.Trim();
-            }
-
-            if(request.fileUrl == "")
-            {
-                if(post.File != null)
+                var user = this.df.CreateDAOUser().GetUser(request.idUser);
+                if (user == null)
                 {
-                    post.File.Url = null;
+                    return Unauthorized("Invalid user.");
                 }
+
+                Post post = this.df.CreateDAOPost().GetPostById(request.id);
+                if (post == null) return NotFound();
+
+                if (post.User is null || post.User.Id != user.Id)
+                {
+                    return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
+                }
+
+                //Validar los campos de post
+                if(!String.IsNullOrWhiteSpace(request.title))
+                {
+                    post.Title = request.title.Trim();
+                }
+
+                if(!String.IsNullOrWhiteSpace(request.content))
+                {
+                    post.Content = request.content.Trim();
+                }
+
+                if(!String.IsNullOrWhiteSpace(request.fileUrl))
+                {
+                    if(post.File == null) post.File = new File();
+                    post.File.Url = request.fileUrl.Trim();
+                }
+
+                if(request.fileUrl == "")
+                {
+                    if(post.File != null)
+                    {
+                        post.File.Url = null;
+                    }
+                }
+
+                this.df.CreateDAOPost().UpdatePost(post);
+
+                UpdatePostResponseDTO response = new UpdatePostResponseDTO
+                {
+                    message = "Post updated successfully"
+                };
+
+                return Ok(response);
             }
 
-            this.df.CreateDAOPost().UpdatePost(post);
-
-            UpdatePostResponseDTO response = new UpdatePostResponseDTO
+            catch(Exception ex)
             {
-                message = "Post updated successfully"
-            };
-
-            return Ok(response);
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
     }
 }

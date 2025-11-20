@@ -20,54 +20,78 @@ namespace apiFollowing.Controllers
         [HttpPost]
         public IActionResult FollowUser([FromQuery] FollowRequestDTO request)
         {
-            User userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
-            User userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
-
-            if (userFollowing == null || userFollowed == null)
+            try
             {
-                return NotFound("User not found");
+                User? userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
+                User? userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
+
+                if (userFollowing == null || userFollowed == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                Following following = new Following
+                {
+                    UserFollowing = userFollowing,
+                    UserFollowed = userFollowed
+                };
+
+                this.df.CreateDAOFollowing().CreateFollowing(following);
+
+                FollowResponseDTO response = new FollowResponseDTO
+                {
+                    message = "Followed successfully",
+                    userFollowing = userFollowing.UserName,
+                    userFollowed = userFollowed.UserName
+                };
+
+                return Ok(new { response });   
             }
 
-            Following following = new Following
+            catch (Exception ex)
             {
-                UserFollowing = userFollowing,
-                UserFollowed = userFollowed
-            };
-
-            this.df.CreateDAOFollowing().CreateFollowing(following);
-
-            FollowResponseDTO response = new FollowResponseDTO
-            {
-                message = "Followed successfully",
-                userFollowing = userFollowing.UserName,
-                userFollowed = userFollowed.UserName
-            };
-
-            return Ok(new { response });
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
         
 
         [HttpDelete]
         public IActionResult UnfollowUser([FromQuery] UnfollowRequestDTO request)
         {
-            User? userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
-            User? userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
-
-            if (userFollowing == null || userFollowed == null)
+            try
             {
-                return NotFound("User not found");
+                User? userFollowing = this.df.CreateDAOUser().GetUser(request.userFollowingId);
+                User? userFollowed = this.df.CreateDAOUser().GetUser(request.userFollowedId);
+
+                if (userFollowing == null || userFollowed == null)
+                {
+                    return NotFound("User not found");
+                }
+
+                this.df.CreateDAOFollowing().DeleteFollowing(request.userFollowingId, request.userFollowedId);
+
+                UnfollowResponseDTO response = new UnfollowResponseDTO
+                {
+                    message = "Unfollow successfully",
+                    userFollowing = userFollowing.UserName,
+                    userFollowed = userFollowed.UserName
+                };
+
+                return Ok(response);    
             }
 
-            this.df.CreateDAOFollowing().DeleteFollowing(request.userFollowingId, request.userFollowedId);
-
-            UnfollowResponseDTO response = new UnfollowResponseDTO
+            catch (Exception ex)
             {
-                message = "Unfollow successfully",
-                userFollowing = userFollowing.UserName,
-                userFollowed = userFollowed.UserName
-            };
-
-            return Ok(response);
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
     } 
 }
