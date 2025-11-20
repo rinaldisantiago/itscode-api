@@ -67,7 +67,9 @@ namespace apiPost.Controllers
                                         userId = c.User?.Id ?? 0,
                                         postId = c.Post?.Id ?? 0,
                                         content = c.Content ?? "",
-                                        createdAt = c.CreatedAt
+                                        createdAt = c.CreatedAt,
+                                        username = c.User?.UserName ?? "",
+                                        avatarUrl = c.User?.Avatar != null ? c.User.Avatar.Url : null
                                     }).ToList(), 
                         userInteraction = GetUserInteraction(post, request.idUserLogger)
 
@@ -136,7 +138,9 @@ namespace apiPost.Controllers
                                     userId = c.User?.Id ?? 0,
                                     postId = c.Post?.Id ?? 0,
                                     content = c.Content ?? "",
-                                    createdAt = c.CreatedAt
+                                    createdAt = c.CreatedAt,
+                                    username = c.User?.UserName ?? "",
+                                    avatarUrl = c.User?.Avatar != null ? c.User.Avatar.Url : null
                                 }).ToList(), // Paginación fija para comentarios
                     userInteraction = GetUserInteraction(post, request.idUserLogger) 
                 };
