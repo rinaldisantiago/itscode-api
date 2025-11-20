@@ -111,7 +111,9 @@ namespace apiComment.Controllers
                     userId = c.User.Id,
                     postId = c.Post.Id,
                     content = c.Content,
-                    createdAt = c.CreatedAt
+                    createdAt = c.CreatedAt,
+                    username = c.User.UserName,
+                    avatarUrl = c.User.Avatar != null ? c.User.Avatar.Url : null
                 }).ToList()
             };
 
