@@ -74,13 +74,34 @@ namespace apiInteraction.Controllers
         [HttpDelete]
         public IActionResult DeleteInteraction([FromBody] DeleteInteractionRequestDTO request)
         {
-            Interaction? interaction = df.CreateDAOInteraction().GetInteractionById(request.interactionId);
-            if (interaction == null)
+            // 1. Buscamos la interacción que se quiere borrar
+            Interaction? interactionToDelete = df.CreateDAOInteraction().GetInteractionById(request.interactionId);
+            if (interactionToDelete == null)
             {
                 return NotFound(new { message = "Interaction not found" });
             }
 
+            // 2. Borramos la interacción existente
             this.df.CreateDAOInteraction().DeleteInteraction(request.interactionId);
+
+            // 3. 🚀 LÓGICA CLAVE: Verificamos si el usuario está cambiando de opinión
+            // Si el tipo de interacción que se quiere crear es diferente al que se borró,
+            // creamos la nueva interacción.
+            if (request.interactionType.HasValue && request.interactionType != (int)interactionToDelete.InteractionType)
+            {
+                Interaction newInteraction = new Interaction
+                {
+                    PostId = interactionToDelete.PostId,
+                    UserId = interactionToDelete.UserId,
+                    InteractionType = (InteractionType)request.interactionType.Value
+                };
+                this.df.CreateDAOInteraction().CreateInteraction(newInteraction);
+
+                // Devolvemos el ID de la nueva interacción creada
+                return Ok(new { message = "Interaction updated successfully", interactionId = newInteraction.Id });
+            }
+
+            // Si solo se está quitando el like/dislike, devolvemos un éxito simple.
             DeleteInteractionResponseDTO response = new DeleteInteractionResponseDTO
             {
                 message = "Interaction deleted successfully",
