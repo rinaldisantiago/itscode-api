@@ -51,6 +51,7 @@ namespace apiComment.Controllers
                 };
                 return Ok(response);
             }
+
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating comment");
@@ -61,63 +62,105 @@ namespace apiComment.Controllers
         [HttpDelete]
         public IActionResult DeleteComment([FromQuery] DeleteCommentRequestDTO request)
         {
-            User? user = this.df.CreateDAOUser().GetUser(request.idUser);
-            if(user is null) return Unauthorized(new { message = "Usuario inválido." });
+            try
+            {   
+                User? user = this.df.CreateDAOUser().GetUser(request.idUser);
+                if(user is null) return Unauthorized(new { message = "Usuario inválido." });
 
-            Comment? comment = this.df.CreateDAOComment().GetCommentById(request.id);
-            if (comment is null) return NotFound(new { message = "Comentario no encontrado." });
+                Comment? comment = this.df.CreateDAOComment().GetCommentById(request.id);
+                if (comment is null) return NotFound(new { message = "Comentario no encontrado." });
 
-            if(comment.User is null || comment.User.Id != user.Id)
-            {
-                return Forbid("El usuario no es el autor del comentario.");
+                Post? post = this.df.CreateDAOPost().GetPostById(request.idPost);
+                if (post is null) return NotFound(new { message = "Post no encontrado." });
+
+                bool isCommentOwner = comment.User?.Id.Equals(user.Id) ?? false;
+                bool isPostOwner = post.User?.Id.Equals(user.Id) ?? false;
+
+                if (!isCommentOwner && !isPostOwner)
+                {
+                    return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
+                }
+
+                this.df.CreateDAOComment().DeleteComment(request.id);
+
+                DeleteCommentResponseDTO response = new DeleteCommentResponseDTO
+                {
+                    message = "Comentario eliminado exitosamente."
+                };
+
+                return Ok(response);
             }
 
-            this.df.CreateDAOComment().DeleteComment(request.id);
-
-            DeleteCommentResponseDTO response = new DeleteCommentResponseDTO
+            catch (Exception ex)
             {
-                message = "Comentario eliminado exitosamente."
-            };
-
-            return Ok(response);
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
 
         [HttpPut]
         public IActionResult UpdateComment([FromBody] UpdateCommentRequestDTO request)
         {
-            Comment comment = this.df.CreateDAOComment().GetCommentById(request.id);
-            if (comment == null) return NotFound();
-
-            comment.Content = request.content;
-            this.df.CreateDAOComment().UpdateComment(comment);
-
-            UpdateCommentResponseDTO response = new UpdateCommentResponseDTO
+            try
             {
-                message = "Comment updated successfully"
-            };
+                Comment comment = this.df.CreateDAOComment().GetCommentById(request.id);
+                if (comment == null) return NotFound();
 
-            return Ok(response);
+                comment.Content = request.content;
+                this.df.CreateDAOComment().UpdateComment(comment);
+
+                UpdateCommentResponseDTO response = new UpdateCommentResponseDTO
+                {
+                    message = "Comment updated successfully"
+                };
+
+                return Ok(response); 
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
 
         [HttpGet]
         public IActionResult GetCommentsByPostId([FromQuery] GetCommentRequestDTO request)
         {
-            var comments = this.df.CreateDAOComment().GetCommentsByPostId(request.postId, request.pageNumber, request.pageSize);
-            var response = new GetCommentResponseDTO
+            try
             {
-                comments = comments.Select(c => new CommentDTO
+                var comments = this.df.CreateDAOComment().GetCommentsByPostId(request.postId, request.pageNumber, request.pageSize);
+                var response = new GetCommentResponseDTO
                 {
-                    id = c.Id,
-                    userId = c.User.Id,
-                    postId = c.Post.Id,
-                    content = c.Content,
-                    createdAt = c.CreatedAt
-                }).ToList()
-            };
+                    comments = comments.Select(c => new CommentDTO
+                    {
+                        id = c.Id,
+                        userId = c.User.Id,
+                        postId = c.Post.Id,
+                        content = c.Content,
+                        createdAt = c.CreatedAt,
+                        username = c.User.UserName,
+                        avatarUrl = c.User.Avatar != null ? c.User.Avatar.Url : null
+                    }).ToList()
+                };
 
-            return Ok(response);
+                return Ok(response);
+            }
+
+            catch (Exception ex)
+            {
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
     }
-
-
 }

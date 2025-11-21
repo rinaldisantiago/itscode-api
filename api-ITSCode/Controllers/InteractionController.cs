@@ -23,69 +23,114 @@ namespace apiInteraction.Controllers
         [HttpPost]
         public IActionResult CreateInteraction([FromBody] PostInteractionRequestDTO request)
         {
-            Post post = this.df.CreateDAOPost().GetPostById(request.postId);
-            User user = this.df.CreateDAOUser().GetUser(request.userId);
-
-            if (post == null || user == null)
+            try
             {
-                return BadRequest(new { message = "Post o usuario no encontrado." });
-            }
+                Post? post = this.df.CreateDAOPost().GetPostById(request.postId);
+                User? user = this.df.CreateDAOUser().GetUser(request.userId);
 
-            if (!Enum.IsDefined(typeof(InteractionType), request.interactionType))
-            {
-                return BadRequest(new { message = "Tipo de interacción inválido." });
-            }
-
-            Interaction? existingInteraction = this.df.CreateDAOInteraction()
-            .GetInteractionByPostAndUser(request.postId, request.userId); 
-
-            if (existingInteraction != null)
-            {
-                // ... (Tu lógica existente para 400 Bad Request y DELETE) ...
-                if ((int)existingInteraction.InteractionType == request.interactionType)
+                if (post == null || user == null)
                 {
-                    return BadRequest(new { message = "Ya existe esta interacción. El frontend debe llamar a DELETE para anularla." }); 
+                    return BadRequest(new { message = "Post o usuario no encontrado." });
                 }
-                else
+
+                if (!Enum.IsDefined(typeof(InteractionType), request.interactionType))
                 {
-                    this.df.CreateDAOInteraction().DeleteInteraction(existingInteraction.Id);
+                    return BadRequest(new { message = "Tipo de interacción inválido." });
                 }
+
+                Interaction? existingInteraction = this.df.CreateDAOInteraction()
+                .GetInteractionByPostAndUser(request.postId, request.userId); 
+
+                if (existingInteraction != null)
+                {
+                    // ... (Tu lógica existente para 400 Bad Request y DELETE) ...
+                    if ((int)existingInteraction.InteractionType == request.interactionType)
+                    {
+                        return BadRequest(new { message = "Ya existe esta interacción. El frontend debe llamar a DELETE para anularla." }); 
+                    }
+                    else
+                    {
+                        this.df.CreateDAOInteraction().DeleteInteraction(existingInteraction.Id);
+                    }
+                }
+
+                Interaction interaction = new Interaction
+                {
+                    PostId = request.postId, // <--- Usar el ID
+                    UserId = request.userId,   // <--- Usar el ID
+                    InteractionType = (InteractionType)request.interactionType
+                };
+
+                this.df.CreateDAOInteraction().CreateInteraction(interaction);
+
+                int newInteractionId = interaction.Id;
+
+                PostInteractionResponseDTO response = new PostInteractionResponseDTO
+                {
+                    message = "Interaction created successfully",
+                    interactionId = newInteractionId
+                };
+                return Ok(response);
             }
 
-            Interaction interaction = new Interaction
+            catch (Exception ex)
             {
-                PostId = request.postId, // <--- Usar el ID
-                UserId = request.userId,   // <--- Usar el ID
-                InteractionType = (InteractionType)request.interactionType
-            };
-
-            this.df.CreateDAOInteraction().CreateInteraction(interaction);
-
-            int newInteractionId = interaction.Id;
-
-            PostInteractionResponseDTO response = new PostInteractionResponseDTO
-            {
-                message = "Interaction created successfully",
-                interactionId = newInteractionId
-            };
-            return Ok(response);
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
 
         [HttpDelete]
         public IActionResult DeleteInteraction([FromBody] DeleteInteractionRequestDTO request)
         {
-            Interaction? interaction = df.CreateDAOInteraction().GetInteractionById(request.interactionId);
-            if (interaction == null)
+            try
             {
-                return NotFound(new { message = "Interaction not found" });
+                // 1. Buscamos la interacción que se quiere borrar
+                Interaction? interactionToDelete = df.CreateDAOInteraction().GetInteractionById(request.interactionId);
+                if (interactionToDelete == null)
+                {
+                    return NotFound(new { message = "Interaction not found" });
+                }
+
+                // 2. Borramos la interacción existente
+                this.df.CreateDAOInteraction().DeleteInteraction(request.interactionId);
+
+                // 3. 🚀 LÓGICA CLAVE: Verificamos si el usuario está cambiando de opinión
+                // Si el tipo de interacción que se quiere crear es diferente al que se borró,
+                // creamos la nueva interacción.
+                if (request.interactionType.HasValue && request.interactionType != (int)interactionToDelete.InteractionType)
+                {
+                    Interaction newInteraction = new Interaction
+                    {
+                        PostId = interactionToDelete.PostId,
+                        UserId = interactionToDelete.UserId,
+                        InteractionType = (InteractionType)request.interactionType.Value
+                    };
+                    this.df.CreateDAOInteraction().CreateInteraction(newInteraction);
+
+                    // Devolvemos el ID de la nueva interacción creada
+                    return Ok(new { message = "Interaction updated successfully", interactionId = newInteraction.Id });
+                }
+
+                // Si solo se está quitando el like/dislike, devolvemos un éxito simple.
+                DeleteInteractionResponseDTO response = new DeleteInteractionResponseDTO
+                {
+                    message = "Interaction deleted successfully",
+                };
+                return Ok(response);
             }
 
-            this.df.CreateDAOInteraction().DeleteInteraction(request.interactionId);
-            DeleteInteractionResponseDTO response = new DeleteInteractionResponseDTO
+            catch (Exception ex)
             {
-                message = "Interaction deleted successfully",
-            };
-            return Ok(response);
+                return StatusCode(500, 
+                    new { 
+                        message = "Error interno del servidor.",
+                        error = ex.Message 
+                    });
+            }
         }
 
         // [HttpGet]
@@ -112,13 +157,5 @@ namespace apiInteraction.Controllers
         //         Type = (int)interaction.InteractionType
         //     });
         // }
-                
-
-
-
-
-
-
-
     }
 }

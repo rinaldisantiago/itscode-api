@@ -41,9 +41,8 @@ namespace apiUser.Controllers
                 }
 
                 User user = this.df.CreateDAOUser().Login(request.userName);
-                bool isPasswordValid = user.IsPasswordValid(request.password);
 
-                if (user == null || !isPasswordValid)
+                if (user is null || !user.IsPasswordValid(request.password))
                 {
                     return Unauthorized(new { message = "Invalid username or password." });
                 }
@@ -76,29 +75,58 @@ namespace apiUser.Controllers
                     user = response,
                 });
             }
-            catch (Exception ex)
+
+            catch(Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
             }
         }
 
         [HttpPost("{id}")]
         public IActionResult Logout([FromRoute] PostLogoutRequestDTO request)
         {
-            User user = this.df.CreateDAOUser().GetUser(request.id);
-            if (user == null) return NotFound();
+            try
+            {
+                User? user = this.df.CreateDAOUser().GetUser(request.id);
+                if (user is null) return NotFound();
 
-            ConnectedUsersCounter.Instance.RemoveUser();
-            return Ok(new {
-                message = "Sesión cerrada correctamente", 
-            });
+                ConnectedUsersCounter.Instance.RemoveUser();
+                return Ok(new {
+                    message = "Sesión cerrada correctamente", 
+                });
+            }
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
 
         [HttpGet]
         public IActionResult GetConnectedUsers()
         {
-            int count = ConnectedUsersCounter.Instance.GetCount();
-            return Ok(new { connectedUsers = count });
+            try
+            {
+                int count = ConnectedUsersCounter.Instance.GetCount();
+                return Ok(new { connectedUsers = count });
+            }
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
 
     }

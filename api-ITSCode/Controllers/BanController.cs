@@ -23,71 +23,105 @@ namespace apiBan.Controllers
         [HttpGet("{id}")]
         public IActionResult getBan([FromRoute] GetBanRequestDTO request)
         {
-            Ban ban = this.df.CreateDAOBan().GetBanById(request.id);
-            if (ban == null) return null;
-
-            GetBanResponseDTO response = new GetBanResponseDTO
+            try
             {
-                userId = ban.User.Id,
-                reason = ban.Reason,
-                banDate = ban.BanDate.ToString("dd/MM/yyyy"),
-                unbanDate = ban.UnbanDate?.ToString("dd/MM/yyyy") ?? ""
-            };
+                Ban? ban = this.df.CreateDAOBan().GetBanById(request.id);
+                if (ban is null) return null;
 
-            return Ok(response);
+                GetBanResponseDTO response = new GetBanResponseDTO
+                {
+                    userId = ban.User.Id,
+                    reason = ban.Reason,
+                    banDate = ban.BanDate.ToString("dd/MM/yyyy"),
+                    unbanDate = ban.UnbanDate?.ToString("dd/MM/yyyy") ?? ""
+                };
+
+                return Ok(response);
+            }
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
 
         [HttpPost]
         public IActionResult CreateBan([FromBody] PostBanRequestDTO request)
         {
-            User user = this.df.CreateDAOUser().GetUser(request.userId);
-            if (user == null) return NotFound();
-
-            user.IsBanned = true;
-            this.df.CreateDAOUser().UpdateUser(user);
-
-            Ban ban = new Ban
+            try
             {
-                User = user,
-                Reason = request.reason,
-                BanDate = DateTime.Parse(request.banDate),
-                UnbanDate = string.IsNullOrEmpty(request.unbanDate)
-                ? (DateTime?)null
-                : DateTime.Parse(request.unbanDate)
-            };
+                User? user = this.df.CreateDAOUser().GetUser(request.userId);
+                if (user is null) return NotFound();
 
-            this.df.CreateDAOBan().CreateBan(ban);
+                user.IsBanned = true;
+                this.df.CreateDAOUser().UpdateUser(user);
 
-            PostBanResponseDTO response = new PostBanResponseDTO
+                Ban ban = new Ban
+                {
+                    User = user,
+                    Reason = request.reason,
+                    BanDate = DateTime.Parse(request.banDate),
+                    UnbanDate = string.IsNullOrEmpty(request.unbanDate)
+                    ? (DateTime?)null
+                    : DateTime.Parse(request.unbanDate)
+                };
+
+                this.df.CreateDAOBan().CreateBan(ban);
+
+                PostBanResponseDTO response = new PostBanResponseDTO
+                {
+                    message = "Ban created successfully"
+                };
+                return Ok(response); 
+            }
+
+            catch(Exception ex)
             {
-                message = "Ban created successfully"
-            };
-            return Ok(response);
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
         
         [HttpDelete]
         public IActionResult DeleteBan([FromQuery] DeleteBanRequestDTO request)
         {
-            Ban? ban = df.CreateDAOBan().GetBanById(request.id);
-            if (ban == null)
-            {
-                return NotFound(new { message = "Ban not found" });
+            try
+            {    
+                Ban? ban = df.CreateDAOBan().GetBanById(request.id);
+                if (ban is null)
+                {
+                    return NotFound(new { message = "Ban not found" });
+                }
+
+                User user = ban.User;
+                user.IsBanned = false;
+                this.df.CreateDAOUser().UpdateUser(user);
+
+                this.df.CreateDAOBan().DeleteBan(request.id);
+                DeleteBanResponseDTO response = new DeleteBanResponseDTO
+                {
+                    message = "Ban deleted successfully",
+                };
+                return Ok(response);
             }
 
-            User user = ban.User;
-            user.IsBanned = false;
-            this.df.CreateDAOUser().UpdateUser(user);
-
-            this.df.CreateDAOBan().DeleteBan(request.id);
-            DeleteBanResponseDTO response = new DeleteBanResponseDTO
+            catch(Exception ex)
             {
-                message = "Ban deleted successfully",
-            };
-            return Ok(response);
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
         }
-
     }
-
 }
 
 
