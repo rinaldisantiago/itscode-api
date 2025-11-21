@@ -269,10 +269,21 @@ namespace apiPost.Controllers
                 {
                     return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
                 }
+            
+                var comments = this.df.CreateDAOComment().GetCommentsByPostId(post.Id, 1, int.MaxValue);
+                if (comments != null && comments.Count > 0)
+                {
+                    foreach (var comment in comments)
+                    {
+                        this.df.CreateDAOComment().DeleteComment(comment.Id);
+                    }
+                }
 
-                this.df.CreateDAOPost().DeletePost(request.id);
                 
-                if(post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
+                this.df.CreateDAOPost().DeletePost(request.id);
+
+                // Eliminar archivo asociado si existe
+                if (post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
 
                 DeletePostResponseDTO response = new DeletePostResponseDTO
                 {
