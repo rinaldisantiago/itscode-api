@@ -70,7 +70,13 @@ namespace apiComment.Controllers
                 Comment? comment = this.df.CreateDAOComment().GetCommentById(request.id);
                 if (comment is null) return NotFound(new { message = "Comentario no encontrado." });
 
-                if(comment.User is null || comment.User.Id != user.Id)
+                Post? post = this.df.CreateDAOPost().GetPostById(request.idPost);
+                if (post is null) return NotFound(new { message = "Post no encontrado." });
+
+                bool isCommentOwner = comment.User?.Id.Equals(user.Id) ?? false;
+                bool isPostOwner = post.User?.Id.Equals(user.Id) ?? false;
+
+                if (!isCommentOwner && !isPostOwner)
                 {
                     return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
                 }
