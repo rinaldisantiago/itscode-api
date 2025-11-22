@@ -418,21 +418,30 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet ("{pageNumber}/{pageSize}")]
+        [HttpGet ("{pageNumber}/{pageSize}/{idUserLogger}/{query?}")]
         public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request)
         {
             try
             {
-                List<User> totalUsers = this.df.CreateDAOUser().GetUsers(request.pageNumber, request.pageSize);
+                List<User> totalUsers;
+
+                if (request.query != null && request.query.Trim() != "")
+                {
+                    totalUsers = this.df.CreateDAOUser().SearchUsers(request.query, request.idUserLogger, request.pageNumber, request.pageSize);
+                }
+                else
+                {
+                    totalUsers = this.df.CreateDAOUser().GetUsers(request.pageNumber, request.pageSize);
+                }
 
                 var response = new GetUsersResponseDTO
                 {
-
                     users = totalUsers.Select(user => new UserDTO
                     {
                         id = user.Id,
                         userName = user.UserName,
-                        role = user.Role.Name
+                        fullName = user.FullName,
+                        role = user.Role?.Name ?? "Usuario"
                     }).ToList()
                 };
 

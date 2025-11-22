@@ -80,9 +80,9 @@ public class EFDAOUser : DAOUser
     public List<User> GetUsers(int pageNumber, int pageSize)
     {
         return this.dbContext.Users
+        .OrderBy(u => u.Id)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
-        .OrderBy(u => u.UserName)
         .ToList();  
     }
 }
