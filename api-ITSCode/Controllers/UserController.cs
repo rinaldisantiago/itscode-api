@@ -140,8 +140,8 @@ namespace apiUser.Controllers
         }
         
 
-        [HttpGet("{id}")]
-        public IActionResult getUser( [FromQuery] GetUserRequestDTO request)
+        [HttpGet("{id}/{idUserLogger}")]
+        public IActionResult getUser( [FromRoute] GetUserRequestDTO request)
         {
             try
             {
@@ -418,16 +418,16 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet ("{pageNumber}/{pageSize}/{idUserLogger}/{query?}")]
-        public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request)
+        [HttpGet ("{pageNumber}/{pageSize}/{idUserLogger}")]
+        public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request, [FromQuery] string? query)
         {
             try
             {
                 List<User> totalUsers;
 
-                if (request.query != null && request.query.Trim() != "")
+                if (query != null && query.Trim() != "")
                 {
-                    totalUsers = this.df.CreateDAOUser().SearchUsers(request.query, request.idUserLogger, request.pageNumber, request.pageSize);
+                    totalUsers = this.df.CreateDAOUser().SearchUsers(query, request.idUserLogger, request.pageNumber, request.pageSize);
                 }
                 else
                 {
