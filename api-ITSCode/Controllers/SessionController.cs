@@ -59,6 +59,11 @@ namespace apiUser.Controllers
 
                 }
 
+                if (request.isLoginDashboard && (user.Role is null || !user.Role.Id.Equals((int)RoleEnum.Admin)))
+                {
+                    return Unauthorized(new { message = "Acceso denegado. Se requieren permisos de administrador." });
+                }
+
                 LoginResponseDTO response = new LoginResponseDTO
                 {
                     id = user.Id,
