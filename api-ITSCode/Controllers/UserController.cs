@@ -140,7 +140,7 @@ namespace apiUser.Controllers
         }
         
 
-        [HttpGet("{id}/{idUserLogger}")]
+        [HttpGet("{id}/{idUserLogger?}")]
         public IActionResult getUser( [FromRoute] GetUserRequestDTO request)
         {
             try
