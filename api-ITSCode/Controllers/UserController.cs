@@ -116,12 +116,10 @@ namespace apiUser.Controllers
                     FullName = request.fullName.Trim(),
                     UserName = request.username.Trim(),
                     Email = request.email.Trim().ToLower(),
-                    Password = new User().SetPassword(request.password).Trim(),
+                    Password = new User().SetPassword(request.password),
                     Role = role,
                     Avatar = avatar
                 };
-
-                user.SetPassword(user.Password);
                 this.df.CreateDAOUser().CreateUser(user);
 
                 PostUserResponseDTO response = new PostUserResponseDTO
@@ -410,6 +408,37 @@ namespace apiUser.Controllers
 
             }
             
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet ("{pageNumber}/{pageSize}")]
+        public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request)
+        {
+            try
+            {
+                List<User> totalUsers = this.df.CreateDAOUser().GetUsers(request.pageNumber, request.pageSize);
+
+                var response = new GetUsersResponseDTO
+                {
+
+                    users = totalUsers.Select(user => new UserDTO
+                    {
+                        id = user.Id,
+                        userName = user.UserName,
+                        role = user.Role.Name
+                    }).ToList()
+                };
+
+                return Ok(response);
+            }
+
             catch(Exception ex)
             {
                 return StatusCode(500, new

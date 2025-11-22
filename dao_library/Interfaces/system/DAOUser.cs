@@ -12,6 +12,7 @@ public interface DAOUser
     User Login(string userName);
     List<User> GetSugerencias(int idUserLogger, int page, int pageSize, List<int> followingIds);
     List<User> SearchUsers(string searchTerm, int idUserLogger, int pageNumber, int pageSize);
+    List<User> GetUsers( int pageNumber, int pageSize);
 }
     
 

@@ -76,4 +76,13 @@ public class EFDAOUser : DAOUser
         .Take(pageSize)
         .ToList();
     }
+
+    public List<User> GetUsers(int pageNumber, int pageSize)
+    {
+        return this.dbContext.Users
+        .Skip((pageNumber - 1) * pageSize)
+        .Take(pageSize)
+        .OrderBy(u => u.UserName)
+        .ToList();  
+    }
 }
