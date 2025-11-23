@@ -72,6 +72,7 @@ public class EFDAOUser : DAOUser
         .Where(u => u.Id != idUserLogger && 
                     (u.UserName.Trim().ToLower().Contains(searchTerm.Trim().ToLower()) || 
                     u.FullName.Trim().ToLower().Contains(searchTerm.Trim().ToLower())))
+        .OrderBy(u => u.UserName)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
         .ToList();
@@ -80,7 +81,7 @@ public class EFDAOUser : DAOUser
     public List<User> GetUsers(int pageNumber, int pageSize)
     {
         return this.dbContext.Users
-        .OrderBy(u => u.Id)
+        .OrderBy(u => u.UserName)
         .Skip((pageNumber - 1) * pageSize)
         .Take(pageSize)
         .ToList();  
