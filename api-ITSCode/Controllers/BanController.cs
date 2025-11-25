@@ -90,21 +90,19 @@ namespace apiBan.Controllers
         }
         
         [HttpDelete]
-        public IActionResult DeleteBan([FromQuery] DeleteBanRequestDTO request)
+        public IActionResult DeleteBan([FromBody] DeleteBanRequestDTO request)
         {
             try
             {    
-                Ban? ban = df.CreateDAOBan().GetBanById(request.id);
-                if (ban is null)
-                {
-                    return NotFound(new { message = "Ban not found" });
-                }
+                User? user = df.CreateDAOUser().GetUser(request.userId);
 
-                User user = ban.User;
+                Ban? ban = df.CreateDAOBan().GetBanByUserId(user);
+
                 user.IsBanned = false;
                 this.df.CreateDAOUser().UpdateUser(user);
 
-                this.df.CreateDAOBan().DeleteBan(request.id);
+                this.df.CreateDAOBan().DeleteBan(ban.Id);
+                
                 DeleteBanResponseDTO response = new DeleteBanResponseDTO
                 {
                     message = "Ban deleted successfully",

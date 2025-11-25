@@ -125,7 +125,7 @@ namespace apiUser.Controllers
 
                 PostUserResponseDTO response = new PostUserResponseDTO
                 {
-                    message = "User created successfully",
+                    message = "Usuario creado exitosamente",
                 };
                 return Ok(response);
             }
@@ -315,7 +315,8 @@ namespace apiUser.Controllers
         {
             try
             {
-                if(request.id != request.idUserLogger)
+                User adminUser = this.df.CreateDAOUser().GetUser(request.idUserLogger);
+                if (adminUser is null || adminUser.Role is null || adminUser.Role.Id != (int)RoleEnum.Admin)
                 {
                     return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
                 }
