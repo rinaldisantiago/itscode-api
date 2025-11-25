@@ -86,4 +86,27 @@ public class EFDAOUser : DAOUser
         .Take(pageSize)
         .ToList();  
     }
+
+    public List<User> GetUsersByRole(string? query,string roleName, int pageNumber, int pageSize)
+    {
+        if (query != null && query.Trim() != "")
+        {
+            return this.dbContext.Users
+            .Where(u => u.UserName.Trim().ToLower().Contains(query.Trim().ToLower()) && u.Role.Name == roleName ||
+                        u.FullName.Trim().ToLower().Contains(query.Trim().ToLower()) && u.Role.Name == roleName)
+            .OrderBy(u => u.UserName)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        }
+        else
+        {
+            return this.dbContext.Users
+            .Where(u => u.Role.Name == roleName)
+            .OrderBy(u => u.UserName)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+        }
+    }
 }

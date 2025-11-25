@@ -419,20 +419,11 @@ namespace apiUser.Controllers
         }
 
         [HttpGet ("{pageNumber}/{pageSize}/{idUserLogger}")]
-        public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request, [FromQuery] string? query)
+        public IActionResult GetUsers([FromRoute] GetUsersRequestDTO request)
         {
             try
             {
-                List<User> totalUsers;
-
-                if (query != null && query.Trim() != "")
-                {
-                    totalUsers = this.df.CreateDAOUser().SearchUsers(query, request.idUserLogger, request.pageNumber, request.pageSize);
-                }
-                else
-                {
-                    totalUsers = this.df.CreateDAOUser().GetUsers(request.pageNumber, request.pageSize);
-                }
+                List<User> totalUsers = this.df.CreateDAOUser().GetUsers(request.pageNumber, request.pageSize);
 
                 var response = new GetUsersResponseDTO
                 {
@@ -441,7 +432,41 @@ namespace apiUser.Controllers
                         id = user.Id,
                         userName = user.UserName,
                         fullName = user.FullName,
-                        role = user.Role?.Name ?? "Usuario"
+                        role = user.Role?.Name ?? "Usuario",
+                        banned = user.IsBanned
+                    }).ToList()
+                };
+
+                return Ok(response);
+            }
+
+            catch(Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Error interno del servidor.",
+                    error = ex.Message
+                });
+            }
+        }
+
+        [HttpGet("({role}/{pageNumber}/{pageSize}")]
+        public IActionResult getUsersByRole([FromRoute] GetUsersByRoleRequestDTO request, [FromQuery] string? query)
+        {
+            try
+            {
+
+                List<User> totalUsers = this.df.CreateDAOUser().GetUsersByRole(query, request.role, request.pageNumber, request.pageSize);
+           
+                var response = new GetUsersResponseDTO
+                {
+                    users = totalUsers.Select(user => new UserDTO
+                    {
+                        id = user.Id,
+                        userName = user.UserName,
+                        fullName = user.FullName,
+                        role = user.Role?.Name ?? "Usuario",
+                        banned = user.IsBanned
                     }).ToList()
                 };
 

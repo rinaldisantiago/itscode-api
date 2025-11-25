@@ -13,6 +13,7 @@ public interface DAOUser
     List<User> GetSugerencias(int idUserLogger, int page, int pageSize, List<int> followingIds);
     List<User> SearchUsers(string searchTerm, int idUserLogger, int pageNumber, int pageSize);
     List<User> GetUsers( int pageNumber, int pageSize);
+    List<User> GetUsersByRole(string? query, string roleName, int pageNumber, int pageSize);
 }
     
 

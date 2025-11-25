@@ -4,4 +4,5 @@ public class UserDTO
     public string userName { get; set; } = "";
     public string fullName { get; set; } = "";
     public string role { get; set; }
+    public bool banned { get; set; }
 }
