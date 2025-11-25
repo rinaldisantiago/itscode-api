@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Diagnostics;
 
 namespace apiUser.Controllers
 {
@@ -456,6 +457,36 @@ namespace apiUser.Controllers
                     error = ex.Message
                 });
             }
+        }
+
+        [HttpPut("updateUserRole")]
+        public IActionResult UpdateUserRole([FromBody] PutUserRoleRequestDTO request)
+        {
+            User? user = this.df.CreateDAOUser().GetUser(request.id);
+            if (user is null) 
+            {
+                return NotFound(new { message = "Usuario no encontrado." });
+            }
+
+            Role? role = this.df.CreateDAORole().GetRoleById(request.idRole);
+            if (role is null)
+            {
+                return BadRequest(new { message = "El rol especificado no existe." });
+            }
+            
+            if (user.Role is not null && user.Role.Id.Equals(request.idRole))
+            {
+                return BadRequest(new { message = "El usuario ya posee este rol." });
+            }
+
+            bool success = this.df.CreateDAOUser().PutUserRole(request.id, request.idRole);
+
+            if (!success)
+            {
+                return StatusCode(500, new { message = "Error interno al actualizar." });
+            }
+            
+            return Ok(new { message = "Rol actualizado correctamente." });
         }
     }
 }

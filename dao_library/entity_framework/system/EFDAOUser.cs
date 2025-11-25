@@ -86,4 +86,30 @@ public class EFDAOUser : DAOUser
         .Take(pageSize)
         .ToList();  
     }
+
+    public bool PutUserRole(int idUser, int idRole)
+    {
+        try
+        {
+            var user = this.dbContext.Users.Find(idUser);
+            
+            var role = this.dbContext.Roles.Find(idRole);
+
+            if (user is null || role is null)
+            {
+                return false;
+            }
+
+            user.Role = role;
+
+            this.dbContext.SaveChanges();
+
+            return true;
+        }
+
+        catch (Exception)
+        {
+            return false;
+        }
+    }
 }
