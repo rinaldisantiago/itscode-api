@@ -51,7 +51,7 @@ namespace apiUser.Controllers
                 {
                     Ban ban = this.df.CreateDAOBan().GetBanByUserId(user);
                   
-                    return Unauthorized(new
+                    return Unauthorized(new LoginBanResponseDTO
                     {
                         message = "Usuario Baneado.",
                         reason = ban.Reason,
