@@ -14,6 +14,7 @@ public interface DAOUser
     List<User> SearchUsers(string searchTerm, int idUserLogger, int pageNumber, int pageSize);
     List<User> GetUsers( int pageNumber, int pageSize);
     bool PutUserRole(int idUser, int idRole);
+    List<User> GetUsersByRole(string? query, string roleName, int pageNumber, int pageSize);
 }
     
 

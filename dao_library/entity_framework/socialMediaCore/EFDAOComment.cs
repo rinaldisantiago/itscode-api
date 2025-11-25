@@ -17,15 +17,14 @@ public class EFDAOComment : DAOComment
 
     public Comment? GetCommentById(int id)
     {
-        return dbContext.Coments
-
-            .FirstOrDefault(c => c.Id == id);
+        return dbContext.Coments.FirstOrDefault(c => c.Id == id);
     }
 
     public List<Comment> GetCommentsByPostId(int postId, int pageNumber, int pageSize)
     {
         return dbContext.Coments
             .Where(c => c.Post != null && c.Post.Id == postId)
+            .OrderByDescending(c => c.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)  
             .Take(pageSize)
             .ToList();
