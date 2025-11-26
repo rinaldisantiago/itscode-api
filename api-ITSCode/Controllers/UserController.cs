@@ -503,22 +503,22 @@ namespace apiUser.Controllers
                 return NotFound(new { message = "Usuario no encontrado." });
             }
 
-            Role? role = this.df.CreateDAORole().GetRoleById(request.idRole);
-            if (role is null)
-            {
-                return BadRequest(new { message = "El rol especificado no existe." });
-            }
+            // Role? role = this.df.CreateDAORole().GetRoleById(request.role);
+            // if (role is null)
+            // {
+            //     return BadRequest(new { message = "El rol especificado no existe." });
+            // }
             
-            if (user.Role is not null && user.Role.Id.Equals(request.idRole))
+            if (user.Role.Name.ToLower().Equals(request.role.ToLower().Trim()))
             {
                 return BadRequest(new { message = "El usuario ya posee este rol." });
             }
 
-            bool success = this.df.CreateDAOUser().PutUserRole(request.id, request.idRole);
+            bool success = this.df.CreateDAOUser().PutUserRole(request.id, request.role);
 
             if (!success)
             {
-                return StatusCode(500, new { message = "Error interno al actualizar." });
+                return StatusCode(500, new { message = "Error, ingrese User o Admin para actualizar." });
             }
             
             return Ok(new { message = "Rol actualizado correctamente." });

@@ -87,30 +87,17 @@ public class EFDAOUser : DAOUser
         .ToList();  
     }
 
-    public bool PutUserRole(int idUser, int idRole)
+    public bool PutUserRole(int idUser, string role)
     {
-        try
-        {
-            var user = this.dbContext.Users.Find(idUser);
-            
-            var role = this.dbContext.Roles.Find(idRole);
+        var user = this.dbContext.Users.FirstOrDefault(u => u.Id == idUser);
+        if (user == null) return false;
 
-            if (user is null || role is null)
-            {
-                return false;
-            }
+        user.Role = this.dbContext.Roles.FirstOrDefault(r => r.Name == role);
+        if (user.Role == null) return false;
 
-            user.Role = role;
-
-            this.dbContext.SaveChanges();
-
-            return true;
-        }
-
-        catch (Exception)
-        {
-            return false;
-        }
+        this.dbContext.Users.Update(user);
+        dbContext.SaveChanges();
+        return true;
     }
     
     public List<User> GetUsersByRole(string? query,string roleName, int pageNumber, int pageSize)
