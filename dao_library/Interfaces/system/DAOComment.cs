@@ -5,6 +5,7 @@ public interface DAOComment
     Comment? GetCommentById(int id);
 
     List<Comment> GetCommentsByPostId(int postId, int pageNumber, int pageSize);
+    List<Comment> GetCommentsByUserId(int userId, int pageNumber, int pageSize);
 
     void DeleteComment(int id);
     void UpdateComment(Comment comment);

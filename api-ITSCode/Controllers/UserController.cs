@@ -324,6 +324,15 @@ namespace apiUser.Controllers
                 User? user = this.df.CreateDAOUser().GetUser(request.id);
                 if (user is null) return NotFound(new { message = "Usuario no encontrado." });
 
+                var comments = this.df.CreateDAOComment().GetCommentsByUserId(user.Id, 1, int.MaxValue);
+                if (comments != null && comments.Count > 0)
+                {
+                    foreach (var comment in comments)
+                    {
+                        this.df.CreateDAOComment().DeleteComment(comment.Id);
+                    }
+                }
+
                 this.df.CreateDAOUser().DeleteUser(request.id);
 
                 DeleteUserResponseDTO response = new DeleteUserResponseDTO
@@ -452,14 +461,14 @@ namespace apiUser.Controllers
             }
         }
 
-        [HttpGet("({role}/{pageNumber}/{pageSize}")]
+        [HttpGet("{pageNumber}/{pageSize}/role{role}")]
         public IActionResult getUsersByRole([FromRoute] GetUsersByRoleRequestDTO request, [FromQuery] string? query)
         {
             try
             {
 
                 List<User> totalUsers = this.df.CreateDAOUser().GetUsersByRole(query, request.role, request.pageNumber, request.pageSize);
-           
+
                 var response = new GetUsersResponseDTO
                 {
                     users = totalUsers.Select(user => new UserDTO

@@ -30,6 +30,16 @@ public class EFDAOComment : DAOComment
             .ToList();
     }
 
+    public List<Comment> GetCommentsByUserId(int userId, int pageNumber, int pageSize)
+    {
+        return dbContext.Coments
+            .Where(c => c.Post != null && c.User.Id == userId)
+            .OrderByDescending(c => c.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)  
+            .Take(pageSize)
+            .ToList();
+    }
+
     public void DeleteComment(int id)
     {
         this.dbContext.Coments.Where(comment => comment.Id == id).ExecuteDelete();
