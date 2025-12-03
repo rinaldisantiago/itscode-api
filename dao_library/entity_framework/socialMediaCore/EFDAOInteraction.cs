@@ -7,12 +7,10 @@ public class EFDAOInteraction : DAOInteraction
     {
         this.appDbContext = appDbContext;
     }
-    public Interaction CreateInteraction(Interaction interaction)
+    public void CreateInteraction(Interaction interaction)
     {
         var createdInteraction = this.appDbContext.Interactions.Add(interaction);
         this.appDbContext.SaveChanges();
-        this.appDbContext.Entry(interaction).State = EntityState.Detached;
-        return createdInteraction.Entity;
     }
     public Interaction? GetInteractionById(int id)
     {
@@ -30,16 +28,8 @@ public class EFDAOInteraction : DAOInteraction
     }
     public Interaction? GetInteractionByPostAndUser(int postId, int userId)
     {
-
-        // return this.appDbContext.Interactions
-        //     .FirstOrDefault(i => i.PostId == postId && i.UserId == userId);
-
         return this.appDbContext.Interactions
-        .AsNoTracking()
-        .Include(i => i.Post) // <-- Necesario para acceder a i.Post.Id
-        .Include(i => i.User) // <-- Necesario para acceder a i.User.Id
-        .FirstOrDefault(i => i.Post.Id == postId && i.User.Id == userId);
+            .AsNoTracking()
+            .FirstOrDefault(i => i.PostId == postId && i.UserId == userId);
     }
-
-
 }
