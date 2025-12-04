@@ -14,6 +14,7 @@ public interface DAOUser
     List<User> GetUsers( int pageNumber, int pageSize);
     bool PutUserRole(int idUser, string role);
     List<User> GetUsersByRole(string? query, string roleName, int pageNumber, int pageSize);
+    int GetCountUsers(string? query,string roleName);
 }
     
 

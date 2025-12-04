@@ -122,4 +122,21 @@ public class EFDAOUser : DAOUser
             .ToList();
         }
     }
+
+    public int GetCountUsers(string? query,string roleName)
+    {
+        if (query != null && query.Trim() != "")
+        {
+            return this.dbContext.Users
+            .Where(u => u.UserName.Trim().ToLower().Contains(query.Trim().ToLower()) && u.Role.Name == roleName ||
+                        u.FullName.Trim().ToLower().Contains(query.Trim().ToLower()) && u.Role.Name == roleName)
+            .Count();
+        }
+        else
+        {
+            return this.dbContext.Users
+            .Where(u => u.Role.Name == roleName)
+            .Count();
+        }
+    }
 }

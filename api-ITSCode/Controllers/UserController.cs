@@ -468,8 +468,8 @@ namespace apiUser.Controllers
         {
             try
             {
-
                 List<User> totalUsers = this.df.CreateDAOUser().GetUsersByRole(query, request.role, request.pageNumber, request.pageSize);
+                int totalCount = this.df.CreateDAOUser().GetCountUsers(query, request.role);
 
                 var response = new GetUsersResponseDTO
                 {
@@ -480,7 +480,9 @@ namespace apiUser.Controllers
                         fullName = user.FullName,
                         role = user.Role?.Name ?? "Usuario",
                         banned = user.IsBanned
-                    }).ToList()
+                    }).ToList(),
+
+                    totalPages = (int)Math.Ceiling((double)totalCount / request.pageSize)
                 };
 
                 return Ok(response);
