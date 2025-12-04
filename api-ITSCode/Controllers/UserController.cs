@@ -335,6 +335,8 @@ namespace apiUser.Controllers
 
                 this.df.CreateDAOUser().DeleteUser(request.id);
 
+                if (user.Avatar is not null) this.df.CreateDAOImage().DeleteImage(user.Avatar.Id);
+
                 DeleteUserResponseDTO response = new DeleteUserResponseDTO
                 {
                     message = "Usuario eliminado exitosamente.",
