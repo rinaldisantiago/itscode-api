@@ -18,7 +18,7 @@ public class EFDAOFactory : DAOFactory
 
     public DAOImage CreateDAOImage()
     {
-        throw new NotImplementedException();
+        return new EFDAOImage(this.appDbContext);
     }
 
     public DAOPost CreateDAOPost()

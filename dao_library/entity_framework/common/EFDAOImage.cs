@@ -13,9 +13,9 @@ public class EFDAOImage : DAOImage
         return GetImage(url);
     }
 
-    public void DeleteImage(string url)
+    public void DeleteImage(int id)
     {
-        this.dbContext.Images.Where(image => image.Url == url).ExecuteDelete();
+        this.dbContext.Images.Where(image => image.Id == id).ExecuteDelete();
     }
 
     public Image? GetImage(string url)
