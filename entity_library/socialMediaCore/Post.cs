@@ -4,24 +4,6 @@ namespace entity_library;
 
 public class Post
 {
-    // private int id;
-    // private User? user;
-    // private string title;
-    // private string content;
-    // private List<Interaction>? interactions;
-    // private File? file;
-    // private List<Comment>? comments;
-
-
-    // public int Id { get { return this.id; } set { this.id = value; } }
-    // public User? User { get { return this.user; } set { this.user = value; } }
-    // public string Title { get { return this.title; } set { this.title = value; } }
-    // public string Content { get { return this.content; } set { this.content = value; } }
-    // public List<Interaction>? Interactions { get { return this.interactions; } set { this.interactions = value; } }
-    // public File? File { get { return this.file; } set { this.file = value; } }
-    // public List<Comment>? Comments { get { return this.comments; } set { this.comments = value; } }
-
-
     private int id;
     public int Id { get { return this.id; } set { this.id = value; } }
     private string title = "";

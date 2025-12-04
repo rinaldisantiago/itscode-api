@@ -6,7 +6,5 @@ public class PostPostRequestDTO
     public string? title { get; set; } = "";
     public string? content { get; set; } = "";
     public string? fileUrl { get; set; }
-    
-    // 👇 CAMBIO CLAVE: Propiedad para recibir el archivo del formulario
-    public IFormFile? File { get; set; } // El nombre 'File' debe coincidir con el 'name' del input HTML
+    public IFormFile? File { get; set; } 
 }

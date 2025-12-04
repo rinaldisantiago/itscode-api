@@ -26,11 +26,6 @@ public class EFDAOPost : DAOPost
     }
 
 
-    // public List<Post> GetPosts(int? idUserConsultado, int? idUserLogger, bool isMyPosts)
-    // {
-    //     throw new NotImplementedException();
-    // }
-
     public List<Post> GetPosts(int idUserConsultado, int idUserLogger, bool isMyPosts, int pageNumber, int pageSize)
     {
         IQueryable<Post> query = this.dbContext.Posts;

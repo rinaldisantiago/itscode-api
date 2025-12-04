@@ -3,7 +3,6 @@
 public interface DAOUser
 {
     User? GetUser(int idUser);
-    // List<User> GetAll();
     void CreateUser(User user);
     User UpdateUser(User user);
     void DeleteUser(int idUser);

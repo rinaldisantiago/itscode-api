@@ -2,7 +2,6 @@
 
 public interface DAOBan
 {
-    // Define methods for managing bans in the system
     void CreateBan(Ban ban);
     Ban? GetBanById(int idBan);
     List<Ban> GetBans(int pageNumber, int pageSize);

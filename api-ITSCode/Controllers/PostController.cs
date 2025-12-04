@@ -42,8 +42,7 @@ namespace apiPost.Controllers
                     pageNumber,
                     pageSize
                 );
-                
-                // Normalizar paginación de comentarios por si vienen vacíos
+
                 int validPageNumberComments = request.pageNumberComments <= 0 ? 1 : request.pageNumberComments;
                 int validPageSizeComments = request.pageSizeComments <= 0 ? 1 : request.pageSizeComments;
 
@@ -100,7 +99,7 @@ namespace apiPost.Controllers
         {
             try
             {
-                // Validamos que el usuario que hace la petición exista
+
                 if (this.df.CreateDAOUser().GetUser(request.idUserLogger) == null)
                 {
                     return Unauthorized("Invalid user.");
@@ -113,11 +112,10 @@ namespace apiPost.Controllers
                     return NotFound(new { message = "Post not found" });
                 }
 
-                // Normalizar paginación de comentarios por si vienen vacíos
+
                 int validPageNumberCommentsReq = request.pageNumberComments <= 0 ? 1 : request.pageNumberComments;
                 int validPageSizeCommentsReq = request.pageSizeComments <= 0 ? 1 : request.pageSizeComments;
 
-                // Mapeamos la entidad Post al DTO de respuesta
                 var postResponse = new GetPostResponseDTO
                 {
                     id = post.Id,
@@ -154,7 +152,6 @@ namespace apiPost.Controllers
         
         }
 
-        // Método auxiliar para obtener la interacción del usuario
         private UserInteractionResponseDTO GetUserInteraction(Post post, int userId)
         {
             var userInteraction = post.Interactions.FirstOrDefault(i => i.User.Id == userId);
@@ -282,7 +279,6 @@ namespace apiPost.Controllers
                 
                 this.df.CreateDAOPost().DeletePost(request.id);
 
-                // Eliminar archivo asociado si existe
                 if (post.File is not null) this.df.CreateDAOFile().DeleteFile(post.File.Id);
 
                 DeletePostResponseDTO response = new DeletePostResponseDTO

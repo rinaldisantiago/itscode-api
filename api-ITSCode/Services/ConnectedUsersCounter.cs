@@ -4,11 +4,8 @@ public sealed class ConnectedUsersCounter
         new Lazy<ConnectedUsersCounter>(() => new ConnectedUsersCounter());
 
     private int _connectedUsers = 0;
-
-    // Propiedad para obtener la instancia global
     public static ConnectedUsersCounter Instance => _instance.Value;
 
-    // Constructor privado para evitar instanciación externa
     private ConnectedUsersCounter() {}
 
     public int GetCount()
@@ -23,7 +20,6 @@ public sealed class ConnectedUsersCounter
 
     public void RemoveUser()
     {
-        // Evitamos números negativos
         if (_connectedUsers > 0)
             Interlocked.Decrement(ref _connectedUsers);
     }

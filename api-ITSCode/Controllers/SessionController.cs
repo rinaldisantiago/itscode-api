@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using dao_library;
 using entity_library;
-// CAMBIO CLAVE: Añadir estos usings para manejo de archivos y rutas
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Threading.Tasks;
@@ -25,7 +24,7 @@ namespace apiUser.Controllers
         }
 
         [HttpPost] 
-        public IActionResult Login([FromBody] LoginRequestDTO request) // 👈 Obtenemos datos del cuerpo
+        public IActionResult Login([FromBody] LoginRequestDTO request)
         {
             try
             {
@@ -38,7 +37,7 @@ namespace apiUser.Controllers
                    String.IsNullOrWhiteSpace(request.password))
                 {
                     return BadRequest(new { message = "Usuario y/o contraseña son obligatorios." });
-                }
+                } 
 
                 User user = this.df.CreateDAOUser().Login(request.userName);
 

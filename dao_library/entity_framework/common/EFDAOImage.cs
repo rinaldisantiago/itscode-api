@@ -10,9 +10,6 @@ public class EFDAOImage : DAOImage
 
     public Image CreateImage(string url)
     {
-        //La funcion además de añadir la imagen a la BD tambíen la obtiene, habiendo dos funciones en una
-        // this.dbContext.Images.Add(url);
-        // dbContext.SaveChanges();
         return GetImage(url);
     }
 
@@ -28,7 +25,6 @@ public class EFDAOImage : DAOImage
 
     public void UpdateImage(string url)
     {
-        //Pasar dos parametros: url a buscar (url vieja) y url de la nueva imagen
         throw new NotImplementedException();
     }
 }

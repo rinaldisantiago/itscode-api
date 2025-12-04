@@ -2,7 +2,6 @@
 
 public interface DAOPost
 {
-    // Define methods for managing posts in the system
     void CreatePost(Post post);
     Post? GetPostById(int id);
 

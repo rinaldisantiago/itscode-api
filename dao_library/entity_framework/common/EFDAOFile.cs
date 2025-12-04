@@ -10,9 +10,6 @@ public class EFDAOFile : DAOFile
 
     public File CreateFile(string url)
     {
-        //Posible cambio de función, ya que añade y devuelve, eso podria ser unicamente en getfile
-        // this.dbContext.Files.Add();
-        // dbContext.SaveChanges();
         return GetFile(url);
     }
 
