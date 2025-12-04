@@ -121,9 +121,3 @@ namespace apiBan.Controllers
         }
     }
 }
-
-
-
-
-
-
