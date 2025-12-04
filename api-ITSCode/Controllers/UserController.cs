@@ -30,7 +30,6 @@ namespace apiUser.Controllers
         {
             try
             {
-                //Validar todas las entradas
                 if(String.IsNullOrWhiteSpace(request.fullName) ||
                 String.IsNullOrWhiteSpace(request.username) ||
                 String.IsNullOrWhiteSpace(request.email) ||
@@ -39,42 +38,36 @@ namespace apiUser.Controllers
                     return BadRequest(new { message = "Algunos campos son obligatorios" } );
                 }
 
-                //Validar formato fullname
                 string pattern = @"^(?=.{1,50}$)[a-zA-ZÀ-ÿ]+( [a-zA-ZÀ-ÿ]+)+$";
                 if (!Regex.IsMatch(request.fullName, pattern, RegexOptions.None))
                 {
                     return BadRequest(new { message = "El nombre completo no cumple con el formato requerido" });
                 }
 
-                //Validar formato username
                 pattern = @"^(?=.{5,25}$)[a-zA-Z0-9_]+$";
                 if (!Regex.IsMatch(request.username, pattern, RegexOptions.None))
                 {
                     return BadRequest(new { message = "El nombre de usuario no cumple con el formato requerido" });
                 }
 
-                //Validar formato email
                 pattern = @"^[^\s@]+@[^\s@]+\.[^\s@]+$";
                 if (!Regex.IsMatch(request.email, pattern, RegexOptions.IgnoreCase))
                 {
                     return BadRequest(new { message = "El correo electrónico no tiene el formato requerido" });
                 }
 
-                //Validar formato password
                 pattern = @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$";
                 if (!Regex.IsMatch(request.password, pattern, RegexOptions.None))
                 {
                     return BadRequest(new { message = "La contraseña no cumple con los requisitos mínimos" });
                 }
 
-                //Validar username existente
                 bool userExists = this.df.CreateDAOUser().GetUserByUsername(request.username);
                 if(userExists)
                 {
                     return BadRequest(new { message = "El nombre de usuario ya existe" });
                 }
 
-                //Validar email existente
                 bool emailExists = this.df.CreateDAOUser().GetUserByEmail(request.email);
                 if (emailExists)
                 {
@@ -153,12 +146,10 @@ namespace apiUser.Controllers
                 }
 
                 bool isFollowing = false;
-                    if (request.idUserLogger > 0) // Solo calculamos si se nos pasa un usuario logueado válido.
+                    if (request.idUserLogger > 0)
                     {
-                        // 1. Obtenemos la lista de IDs que el usuario logueado sigue.
                         var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
                         
-                        // 2. Comprobamos si el ID del perfil visitado está en esa lista.
                         isFollowing = followingIds.Contains(request.id);
                     }
 
@@ -264,8 +255,6 @@ namespace apiUser.Controllers
                     user.SetPassword(request.password);
                 }
 
-                // --- LÓGICA DE AVATAR MODIFICADA ---
-                // Prioridad 1: Si se sube un archivo de imagen, se procesa y se guarda.
                 if (request.image != null && request.image.Length > 0)
                 {
                     string uploadsFolder = Path.Combine(_hostEnvironment.WebRootPath, "avatars");
@@ -279,15 +268,12 @@ namespace apiUser.Controllers
                     
                     user.Avatar.Url = $"/avatars/{uniqueFileName}";
                 }
-                // Prioridad 2: Si NO se subió archivo, pero SÍ se proporcionó una URL, se usa esa URL.
+
                 else if (!string.IsNullOrEmpty(request.urlAvatar))
                 {
-                    // Aquí podrías añadir validación para asegurarte de que es una URL válida.
                     user.Avatar.Url = request.urlAvatar;
                 }
-                // Si no se proporciona ni archivo ni URL, el avatar actual no se modifica.
 
-                // ... (guardar cambios y devolver respuesta - sin cambios)
                 User updatedUser = this.df.CreateDAOUser().UpdateUser(user);
                 PutUserResponseDTO response = new PutUserResponseDTO
                 {
@@ -358,16 +344,14 @@ namespace apiUser.Controllers
 
 
         [HttpGet("Suggestions/{idUserLogger}/{page}/{pageSize}")]
-        public IActionResult suggestion([FromRoute] GetSugerenciasResquestDTO request)
+        public IActionResult suggestion([FromRoute] GetSugerenciasRequestDTO request)
         {
             try
             {
-                // Obtener sugerencias desde el DAO
                 var followingIds = this.df.CreateDAOFollowing().GetFollowedUserIds(request.idUserLogger);
                 List<User> suggestion = this.df.CreateDAOUser()
                     .GetSugerencias(request.idUserLogger, request.page, request.pageSize, followingIds);
 
-                // Mapear a DTO de respuesta
                 GetSugerenciasResponseDTO response = new GetSugerenciasResponseDTO
                 {
                     suggestions = suggestion.Select(u => new UserSuggestionDto
@@ -504,12 +488,6 @@ namespace apiUser.Controllers
             {
                 return NotFound(new { message = "Usuario no encontrado." });
             }
-
-            // Role? role = this.df.CreateDAORole().GetRoleById(request.role);
-            // if (role is null)
-            // {
-            //     return BadRequest(new { message = "El rol especificado no existe." });
-            // }
             
             if (user.Role.Name.ToLower().Equals(request.role.ToLower().Trim()))
             {

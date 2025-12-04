@@ -138,7 +138,7 @@ namespace apiPost.Controllers
                                     createdAt = c.CreatedAt,
                                     username = c.User?.UserName ?? "",
                                     avatarUrl = c.User?.Avatar != null ? c.User.Avatar.Url : null
-                                }).ToList(), // Paginación fija para comentarios
+                                }).ToList(),
                     userInteraction = GetUserInteraction(post, request.idUserLogger) 
                 };
 
@@ -319,7 +319,6 @@ namespace apiPost.Controllers
                     return StatusCode(403, new { message = "No tienes permiso para realizar esta acción." });
                 }
 
-                //Validar los campos de post
                 if(!String.IsNullOrWhiteSpace(request.title))
                 {
                     post.Title = request.title.Trim();
