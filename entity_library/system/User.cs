@@ -20,26 +20,22 @@ public class User : Person
     public virtual Image? Avatar { get { return this.avatar; } set { this.avatar = value; } }
 
 
-    public string GetRole
+    public int GetRole()
     {
-        get
+        if (this.Role is not null)
         {
-
-            if (this.Role != null)
-            {
-                return this.Role.Name;
-            }
-            return "No role assigned";
+            return this.Role.Id;
         }
+        return 0;
     }
 
     public string GetAvatar()
     {
-            if (this.Avatar != null)
-            {
-                return this.Avatar.Url;
-            }
-            return "No avatar assigned";
+        if (this.Avatar != null)
+        {
+            return this.Avatar.Url;
+        }
+        return "No avatar assigned";
     }
 
     public string SetPassword(string password)
