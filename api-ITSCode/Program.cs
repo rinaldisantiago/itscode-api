@@ -18,6 +18,7 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 
 builder.Services.AddScoped<DAOFactory, EFDAOFactory>();
 
+// --- CONFIGURACIÓN DE CORS SIMPLIFICADA (DRY) ---
 var corsOrigins = new List<string>();
 
 // Leemos los orígenes desde la configuración, sin importar el entorno
@@ -41,11 +42,12 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// --- MEJORA: Aplicar migraciones ---
+// --- ¡CORRECCIÓN AQUÍ! ---
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.Migrate(); // Vuelve a Migrate, es mejor que EnsureCreated
+    // Usamos EnsureCreated() porque no tenemos archivos de migración aún
+    context.Database.EnsureCreated();
 }
 
 // Configure the HTTP request pipeline.
