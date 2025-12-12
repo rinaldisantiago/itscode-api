@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,24 +18,34 @@ builder.Services.AddDbContext<AppDbContext>(option =>
 
 builder.Services.AddScoped<DAOFactory, EFDAOFactory>();
 
-// Configurar CORS
+var corsOrigins = new List<string>();
+
+// Leemos los orígenes desde la configuración, sin importar el entorno
+var originsFromConfig = builder.Configuration["AllowedOrigins"];
+if (!string.IsNullOrEmpty(originsFromConfig))
+{
+    corsOrigins.AddRange(originsFromConfig.Split(','));
+}
+
+// Registramos la política de CORS con la lista de orígenes que construimos
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
+    options.AddDefaultPolicy(
         policy =>
         {
-            policy.AllowAnyOrigin()
-                  .AllowAnyMethod()
-                  .AllowAnyHeader();
+            policy.WithOrigins(corsOrigins.ToArray())
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
         });
 });
 
 var app = builder.Build();
 
+// --- MEJORA: Aplicar migraciones ---
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    context.Database.EnsureCreated();
+    context.Database.Migrate(); // Vuelve a Migrate, es mejor que EnsureCreated
 }
 
 // Configure the HTTP request pipeline.
@@ -44,15 +55,18 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
-app.UseStaticFiles(); 
-// Usar CORS antes de Authorization
-app.UseCors("AllowAll");
+// app.UseHttpsRedirection(); // Comentado para producción detrás de un proxy
+
+app.UseStaticFiles();
+
+// Usamos la política por defecto que registramos
+app.UseCors();
 
 app.UseAuthorization();
-
 app.MapControllers();
-
-
 app.Run();
