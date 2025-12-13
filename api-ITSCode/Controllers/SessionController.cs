@@ -51,7 +51,7 @@ namespace apiUser.Controllers
         private void CheckUserRole(User user, LoginRequestDTO request)
         {
             bool requiresAdmin = request.isLoginDashboard;
-            bool isNotAdmin = user.Role == null || !user.Role.Id.Equals((int)RoleEnum.Admin);
+            bool isNotAdmin = user.Role == null || !user.GetRole().Equals((int)RoleEnum.Admin);
 
             if (requiresAdmin && isNotAdmin)
             {
