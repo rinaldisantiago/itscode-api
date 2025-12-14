@@ -61,7 +61,7 @@ namespace apiUser.Controllers
 
         private LoginResponseDTO ProcessSuccessfulLogin(User user)
         {
-            ConnectedUsersCounter.Instance.AddUser();
+            Singleton.GetInstance().AddUser();
 
             return new LoginResponseDTO
             {
@@ -125,7 +125,7 @@ namespace apiUser.Controllers
                 User? user = this.df.CreateDAOUser().GetUser(request.id);
                 if (user is null) return NotFound();
 
-                ConnectedUsersCounter.Instance.RemoveUser();
+                Singleton.GetInstance().RemoveUser();
                 return Ok(new {
                     message = "Sesión cerrada correctamente", 
                 });
@@ -146,7 +146,7 @@ namespace apiUser.Controllers
         {
             try
             {
-                int count = ConnectedUsersCounter.Instance.GetCount();
+                int count = Singleton.GetInstance().GetCount();
                 return Ok(new { connectedUsers = count });
             }
 
